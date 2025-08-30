@@ -318,6 +318,14 @@
       border-left: 3px solid transparent;
     }
 
+    .email-item.even {
+      background: #fafafa;
+    }
+
+    .email-item.odd {
+      background: #fff;
+    }
+
     .email-item:hover {
       transform: translateY(-1px);
       box-shadow: 0 2px 6px rgba(59,130,246,0.15);
@@ -328,11 +336,23 @@
       background: #f0fdf4;
     }
 
+    .email-item.has-code.even {
+      background: #f0fdf4;
+    }
+
     .email-info {
       display: flex;
       align-items: center;
       gap: 12px;
       flex: 1;
+    }
+
+    .email-no {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 600;
+      min-width: 50px;
+      margin-right: 8px;
     }
 
     .email-text {
@@ -405,11 +425,39 @@
       transform: translateY(-1px);
     }
 
+    .stop-btn {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 8px;
+    }
+
+    .stop-btn:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+
     .polling-status {
       font-size: 11px;
       color: #f59e0b;
       font-weight: 600;
       margin-left: 8px;
+    }
+
+    .fetch-time {
+      margin-left: 12px;
+    }
+
+    .time-text {
+      font-size: 11px;
+      color: #6b7280;
+      font-style: italic;
     }
 
     .fetch-btn.polling {
@@ -493,7 +541,7 @@
 
   <script>
     // 配置
-    const API_URL = 'https://script.google.com/macros/s/AKfycbz0SOYUETcgza6CWFJAGgJzkjy3627szc9TV_qw0lhFAzeKsIb0e9Zw-qEFxG_oP8_KMg/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbw8uddQq18XNJ4BCqjHCP00epK2vdyQobqAggsHPaNY0BaYH2wHJMk-Reu2_lNjlc1jeQ/exec';
     const REFRESH_INTERVAL = 3000; // 3秒刷新一次
     let lastCode = null;
     let refreshTimer = null;
@@ -550,16 +598,32 @@
       // 如果有验证码数据，显示最新的验证码
       if (data.codes && data.codes.length > 0) {
         const latestCode = data.codes[0];
+        const fetchTime = new Date().toLocaleTimeString('zh-CN');
+        
         codeDisplayArea.innerHTML = `
           <span class="code-display has-code">
             ${latestCode.code}
             <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">复制</button>
           </span>
         `;
+        
+        // 显示获取时间
+        const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
+        if (fetchTimeElement) {
+          fetchTimeElement.innerHTML = `<span class="time-text">获取时间: ${fetchTime}</span>`;
+        }
+        
         emailItem.classList.add('has-code');
       } else {
         // 没有验证码时显示提示
         codeDisplayArea.innerHTML = `<span class="code-display">暂无验证码</span>`;
+        
+        // 清除获取时间
+        const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
+        if (fetchTimeElement) {
+          fetchTimeElement.innerHTML = '';
+        }
+        
         emailItem.classList.remove('has-code');
       }
     }
@@ -743,15 +807,23 @@
       const emailListHTML = emails.map((email, index) => {
         const isPolling = pollingStatus[email] && pollingStatus[email].isActive;
         const remainingTime = isPolling ? Math.ceil((pollingStatus[email].endTime - Date.now()) / 1000) : 0;
+        const isEven = index % 2 === 0;
         
         return `
-          <div class="email-item" data-email="${email}" data-index="${index}">
+          <div class="email-item ${isEven ? 'even' : 'odd'}" data-email="${email}" data-index="${index}">
             <div class="email-info">
+              <span class="email-no">No.${index + 1}</span>
               <span class="email-text">${email}</span>
               <span class="code-display" id="codeDisplay-${index}"></span>
-              ${isPolling ? `<span class="polling-status">轮询中 (${remainingTime}s)</span>` : ''}
+              <span class="fetch-time" id="fetchTime-${index}"></span>
             </div>
             <div class="email-actions">
+              ${isPolling ? `<span class="polling-status">轮询中 (${remainingTime}s)</span>` : ''}
+              ${isPolling ? `
+                <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)">
+                  停止
+                </button>
+              ` : ''}
               <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)">
                 ${isPolling ? '轮询中' : '取码'}
               </button>
@@ -841,6 +913,11 @@
       
       // 显示操作提示
       showOperationTip(email, '轮询结束');
+    }
+
+    // 停止轮询指定邮箱（供按钮调用）
+    function stopPollingForEmail(email, button) {
+      stopPolling(email);
     }
 
     // 单次获取验证码
