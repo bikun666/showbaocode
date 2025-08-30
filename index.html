@@ -425,6 +425,24 @@
       transform: translateY(-1px);
     }
 
+    .email-copy-btn {
+      background: #8b5cf6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+
+    .email-copy-btn:hover {
+      background: #7c3aed;
+      transform: translateY(-1px);
+    }
+
     .stop-btn {
       background: #ef4444;
       color: #fff;
@@ -509,6 +527,102 @@
         opacity: 1;
       }
     }
+
+    /* 使用说明样式 */
+    .usage-guide {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-top: 20px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+
+    .guide-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 20px 30px;
+      text-align: center;
+    }
+
+    .guide-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .guide-content {
+      padding: 30px;
+    }
+
+    .guide-section {
+      margin-bottom: 25px;
+    }
+
+    .guide-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .guide-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .guide-section ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .guide-section li {
+      padding: 8px 0;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .guide-section li:before {
+      content: "•";
+      color: #3b82f6;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+      top: 8px;
+    }
+
+    .guide-section strong {
+      color: #374151;
+      font-weight: 600;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .guide-content {
+        padding: 20px;
+      }
+      
+      .guide-header {
+        padding: 15px 20px;
+      }
+      
+      .guide-header h2 {
+        font-size: 18px;
+      }
+      
+      .guide-section h3 {
+        font-size: 15px;
+      }
+      
+      .guide-section li {
+        font-size: 13px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -528,7 +642,7 @@
         </button>
       </div>
       <div class="notice">如果验证码一直没来请联系 A Kun</div>
-      <div style="font-size: 12px; color: #666; margin-top: 5px;">API地址: <span id="apiUrlDisplay"></span></div>
+
     </div>
     
     <div id="content">
@@ -536,6 +650,42 @@
         <div class="loading-text">正在加载邮箱列表，请稍候...</div>
         <div id="timerStatus" style="font-size: 12px; color: #666; margin-top: 10px;"></div>
       </div>
+    </div>
+    
+    <!-- 使用说明 -->
+    <div class="usage-guide">
+      <div class="guide-header">
+        <h2>📖 使用说明</h2>
+      </div>
+      <div class="guide-content">
+        <div class="guide-section">
+          <h3>🎯 基本操作</h3>
+          <ul>
+            <li><strong>取码</strong>：点击邮箱右侧的"取码"按钮开始轮询该邮箱</li>
+            <li><strong>停止</strong>：轮询过程中点击"停止"按钮可立即停止轮询</li>
+            <li><strong>刷新</strong>：点击右上角"刷新"按钮重新获取邮箱列表</li>
+          </ul>
+        </div>
+        
+        <div class="guide-section">
+          <h3>📋 功能说明</h3>
+          <ul>
+            <li><strong>轮询机制</strong>：每次只能轮询一个邮箱，开始新轮询会自动停止其他轮询</li>
+            <li><strong>轮询时长</strong>：每个邮箱轮询5分钟，自动停止</li>
+            <li><strong>验证码更新</strong>：只有发现新验证码才会更新显示，避免重复</li>
+            <li><strong>时间显示</strong>：显示验证码在的实际获取时间</li>
+          </ul>
+        </div>
+        
+        <div class="guide-section">
+          <h3>📋 复制功能</h3>
+          <ul>
+            <li><strong>邮箱复制</strong>：点击邮箱地址后的紫色"邮箱复制"按钮</li>
+            <li><strong>验证码复制</strong>：点击验证码后的绿色"码复制"按钮</li>
+            <li><strong>复制反馈</strong>：复制成功会显示"已复制"，1秒后恢复</li>
+          </ul>
+        </div>
+              </div>
     </div>
   </div>
 
@@ -614,7 +764,7 @@
           codeDisplayArea.innerHTML = `
             <span class="email-code-display has-code">
               ${latestCode.code}
-              <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">复制</button>
+              <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">码复制</button>
             </span>
           `;
           
@@ -868,6 +1018,7 @@
             <div class="email-info">
               <span class="email-no">No.${index + 1}</span>
               <span class="email-text">${email}</span>
+              <button class="email-copy-btn" onclick="copyToClipboard('${email}')">邮箱复制</button>
               <span class="email-code-display" id="codeDisplay-${index}"></span>
               <span class="fetch-time" id="fetchTime-${index}"></span>
             </div>
@@ -1151,10 +1302,21 @@
         const copyBtn = event.target;
         const originalText = copyBtn.textContent;
         copyBtn.textContent = '已复制';
-        copyBtn.style.background = '#10b981';
+        
+        // 根据按钮类型设置不同的背景色
+        if (copyBtn.classList.contains('email-copy-btn')) {
+          copyBtn.style.background = '#10b981';
+        } else {
+          copyBtn.style.background = '#10b981';
+        }
+        
         setTimeout(() => {
           copyBtn.textContent = originalText;
-          copyBtn.style.background = '#3b82f6';
+          if (copyBtn.classList.contains('email-copy-btn')) {
+            copyBtn.style.background = '#8b5cf6';
+          } else {
+            copyBtn.style.background = '#10b981';
+          }
         }, 1000);
       }).catch(err => {
         console.error('复制失败:', err);
