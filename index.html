@@ -362,13 +362,13 @@
       min-width: 200px;
     }
 
-    .code-display {
+    .email-code-display {
       font-size: 12px;
       color: #6b7280;
       font-family: monospace;
     }
 
-    .code-display.has-code {
+    .email-code-display.has-code {
       color: #059669;
       font-weight: 600;
       font-size: 14px;
@@ -541,7 +541,7 @@
 
   <script>
     // 配置
-    const API_URL = 'https://script.google.com/macros/s/AKfycby6HMd5cW73eWQ-bCcaXurgPmZr_EA-epuHt4IzdTE6kgifQ61ZUigH5s9D-R4tMsN3hw/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzRrco95h7N7nYZgRVaTJOgWUDuVN0bsWe6vWfdP-RNR2H2D-GZbwiPbWInm1vM4KrgZQ/exec';
     const REFRESH_INTERVAL = 3000; // 3秒刷新一次
     let lastCode = null;
     let refreshTimer = null;
@@ -600,7 +600,7 @@
         const latestCode = data.codes[0];
         
         // 检查当前显示的验证码
-        const currentCodeElement = codeDisplayArea.querySelector('.code-display.has-code');
+        const currentCodeElement = codeDisplayArea.querySelector('.email-code-display.has-code');
         const currentCode = currentCodeElement ? currentCodeElement.textContent.trim().split(' ')[0] : null;
         
         // 只有新码才更新显示
@@ -610,7 +610,7 @@
           
           // 更新验证码显示
           codeDisplayArea.innerHTML = `
-            <span class="code-display has-code">
+            <span class="email-code-display has-code">
               ${latestCode.code}
               <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">复制</button>
             </span>
@@ -634,14 +634,14 @@
         }
       } else {
         // 没有验证码时，只有当前没有显示验证码才更新
-        const currentCodeElement = codeDisplayArea.querySelector('.code-display.has-code');
+        const currentCodeElement = codeDisplayArea.querySelector('.email-code-display.has-code');
         if (currentCodeElement) {
           console.log('当前有验证码，但API返回空，保持原状态');
           return;
         }
         
         // 当前没有验证码时才显示"暂无验证码"
-        codeDisplayArea.innerHTML = `<span class="code-display">暂无验证码</span>`;
+        codeDisplayArea.innerHTML = `<span class="email-code-display">暂无验证码</span>`;
         
         // 清除获取时间
         const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
@@ -866,7 +866,7 @@
             <div class="email-info">
               <span class="email-no">No.${index + 1}</span>
               <span class="email-text">${email}</span>
-              <span class="code-display" id="codeDisplay-${index}"></span>
+              <span class="email-code-display" id="codeDisplay-${index}"></span>
               <span class="fetch-time" id="fetchTime-${index}"></span>
             </div>
             <div class="email-actions">
@@ -984,6 +984,19 @@
     function fetchCodeOnce(email, button) {
       console.log('轮询获取验证码:', email);
       
+      // 获取当前显示的验证码
+      const emailIndex = emailList.findIndex(e => e === email);
+      let currentCode = null;
+      if (emailIndex !== -1) {
+        const codeDisplayArea = document.getElementById(`codeDisplay-${emailIndex}`);
+        if (codeDisplayArea) {
+          const currentCodeElement = codeDisplayArea.querySelector('.email-code-display.has-code');
+          if (currentCodeElement) {
+            currentCode = currentCodeElement.textContent.trim().split(' ')[0];
+          }
+        }
+      }
+      
       // 创建唯一的回调函数名
       const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       
@@ -994,7 +1007,11 @@
       
       // 创建script标签
       const script = document.createElement('script');
-      script.src = API_URL + '?email=' + encodeURIComponent(email) + '&callback=' + callbackName;
+      let url = API_URL + '?email=' + encodeURIComponent(email) + '&callback=' + callbackName;
+      if (currentCode) {
+        url += '&currentCode=' + encodeURIComponent(currentCode);
+      }
+      script.src = url;
       
       // 设置超时
       const timeout = setTimeout(() => {
@@ -1117,7 +1134,7 @@
       // 找到对应邮箱的验证码显示区域
       const emailItem = button.closest('.email-item');
       if (emailItem) {
-        const codeDisplayArea = emailItem.querySelector('.code-display');
+        const codeDisplayArea = emailItem.querySelector('.email-code-display');
         if (codeDisplayArea) {
           codeDisplayArea.innerHTML = `<span style="color: #ef4444;">❌ ${message}</span>`;
           emailItem.classList.remove('has-code');
