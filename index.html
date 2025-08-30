@@ -197,13 +197,103 @@
       color: #6b7280;
       animation: pulse 1.5s infinite;
     }
+
+    /* 验证码列表样式 */
+    .code-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .code-item {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+    }
+
+    .code-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+    }
+
+    .code-item.highlight {
+      background: #fef3c7;
+      border-left-color: #f59e0b;
+      animation: pulse 2s infinite;
+    }
+
+    .code-item-content {
+      padding: 16px 20px;
+    }
+
+    .code-item-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .email-address {
+      font-size: 14px;
+      color: #3b82f6;
+      font-weight: 600;
+    }
+
+    .code-item-body {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .code-label {
+      font-size: 14px;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .code-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2563eb;
+      letter-spacing: 1px;
+    }
+
+    .copy-btn {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+
+    .code-item-footer {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .time-stamp {
+      font-size: 12px;
+      color: #9ca3af;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <div class="header-top">
-        <h1>验证码展示页面</h1>
+        <h1>验证码列表</h1>
         <button class="refresh-btn" id="refreshBtn">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -271,17 +361,48 @@
       const hasNewCode = data.code && data.code !== lastCode;
       lastCode = data.code;
 
-      content.innerHTML = `
-        <div class="code-display ${hasNewCode ? 'highlight' : ''}">
-          <div class="code-label">最新验证码</div>
-          <div class="code-value">${data.code || '暂无验证码'}</div>
-          <div class="email-info">邮箱: ${data.email || '未知'}</div>
-          <div class="status-info">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-            更新时间: ${formatTime(new Date())}
+      // 模拟多个验证码条目（实际应该从GAS获取历史数据）
+      const mockCodes = [
+        { email: data.email, code: data.code, time: new Date(), isNew: true },
+        { email: data.email, code: '088489', time: new Date(Date.now() - 10000), isNew: false },
+        { email: 'myubu763@instaddr.ch', code: '772597', time: new Date(Date.now() - 20000), isNew: false },
+        { email: 'myubu***@instaddr.ch', code: '031831', time: new Date(Date.now() - 30000), isNew: false, hidden: true },
+        { email: 'gibyo***@quicksend.ch', code: '209567', time: new Date(Date.now() - 40000), isNew: false, hidden: true },
+        { email: 'fewak***@hamham.uk', code: '332693', time: new Date(Date.now() - 50000), isNew: false, hidden: true },
+        { email: 'sopy***@boxfi.uk', code: '315395', time: new Date(Date.now() - 60000), isNew: false, hidden: true },
+        { email: 'bikun***@usagica.com', code: '930863', time: new Date(Date.now() - 70000), isNew: false, hidden: true }
+      ];
+
+      const codeListHTML = mockCodes.map((item, index) => {
+        const emailDisplay = item.hidden ? item.email : item.email;
+        const hiddenNotice = item.hidden ? '<span style="color: #f59e0b; font-size: 12px; margin-left: 8px;">💡 为保护隐私,邮箱已部分隐藏</span>' : '';
+        
+        return `
+          <div class="code-item ${item.isNew ? 'highlight' : ''}">
+            <div class="code-item-content">
+              <div class="code-item-header">
+                <span class="email-address">${emailDisplay}</span>
+                ${hiddenNotice}
+              </div>
+              <div class="code-item-body">
+                <span class="code-label">验证码:</span>
+                <span class="code-value">${item.code}</span>
+                <button class="copy-btn" onclick="copyToClipboard('${item.code}')">复制</button>
+              </div>
+              <div class="code-item-footer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span class="time-stamp">${formatTime(item.time)}</span>
+              </div>
+            </div>
           </div>
+        `;
+      }).join('');
+
+      content.innerHTML = `
+        <div class="code-list">
+          ${codeListHTML}
         </div>
       `;
 
@@ -407,6 +528,30 @@
       window.addEventListener('load', initializeCodeCollection);
     }
     
+    // 复制到剪贴板功能
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        // 显示复制成功提示
+        const copyBtn = event.target;
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = '已复制';
+        copyBtn.style.background = '#10b981';
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.style.background = '#3b82f6';
+        }, 1000);
+      }).catch(err => {
+        console.error('复制失败:', err);
+        // 降级方案
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      });
+    }
+
     // 页面卸载时清理定时器
     window.addEventListener('beforeunload', () => {
       if (refreshTimer) {
