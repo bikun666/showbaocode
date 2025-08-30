@@ -345,6 +345,8 @@
       align-items: center;
       gap: 12px;
       flex: 1;
+      flex-wrap: nowrap;
+      overflow: hidden;
     }
 
     .email-no {
@@ -366,28 +368,34 @@
       font-weight: 500;
       width: 280px;
       max-width: 280px;
+      min-width: 280px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       display: inline-block;
+      flex-shrink: 0;
     }
 
     .email-code-display {
       font-size: 12px;
       color: #6b7280;
       font-family: monospace;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .email-code-display.has-code {
       color: #059669;
       font-weight: 600;
       font-size: 14px;
+      white-space: nowrap;
     }
 
     .email-actions {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
     }
 
     .fetch-btn {
@@ -401,6 +409,8 @@
       cursor: pointer;
       transition: all 0.2s;
       min-width: 50px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .fetch-btn:hover {
@@ -428,6 +438,8 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .copy-btn:hover {
@@ -446,6 +458,8 @@
       cursor: pointer;
       transition: all 0.2s;
       margin-left: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .email-copy-btn:hover {
@@ -464,6 +478,8 @@
       cursor: pointer;
       transition: all 0.2s;
       margin-right: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .stop-btn:hover {
@@ -476,16 +492,21 @@
       color: #f59e0b;
       font-weight: 600;
       margin-left: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .fetch-time {
       margin-left: 12px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .time-text {
       font-size: 11px;
       color: #6b7280;
       font-style: italic;
+      white-space: nowrap;
     }
 
     .fetch-btn.polling {
