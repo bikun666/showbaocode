@@ -6,820 +6,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;800&display=swap">
   <style>
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0 
-    }
-    
-    body {
-      background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
-      color: #1e293b;
-      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-      padding: 20px; 
-      min-height: 100vh;
-    }
-    
-    .container {
-      max-width: 800px; 
-      margin: 0 auto;
-      animation: fadeIn 0.5s ease-out;
-      transform-origin: center center;
-      transition: transform 0.2s;
-    }
-    
-    .header {
-      background: #fff; 
-      border-radius: 16px; 
-      box-shadow: 0 6px 20px rgba(59,130,246,0.15);
-      padding: 20px 30px; 
-      margin-bottom: 16px; 
-      border: 1px solid #dbeafe;
-      transition: box-shadow 0.3s;
-    }
-    
-    .header.flash {
-      animation: flashHeader 1s ease-out;
-    }
-    
-    @keyframes flashHeader {
-      0%   { box-shadow: 0 0 0   0   rgba(59,130,246,0); }
-      50%  { box-shadow: 0 0 15px 5px rgba(59,130,246,0.5); }
-      100% { box-shadow: 0 0 0   0   rgba(59,130,246,0); }
-    }
-    
-    @keyframes fadeIn { 
-      from { opacity: 0; transform: translateY(20px) } 
-      to   { opacity: 1; transform: translateY(0)    } 
-    }
-    
-    .header-top {
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 12px;
-    }
-    
-    .header h1 {
-      font-size: 24px; 
-      font-weight: 800; 
-      color: #2563eb;
-      background: linear-gradient(90deg,#3b82f6,#1d4ed8);
-      -webkit-background-clip: text; 
-      background-clip: text;
-      -webkit-text-fill-color: transparent; 
-      white-space: nowrap;
-    }
-    
-    .refresh-btn {
-      background: #3b82f6; 
-      color: #fff; 
-      border: none; 
-      border-radius: 10px;
-      padding: 10px 20px; 
-      font-size: 14px; 
-      font-weight: 600; 
-      cursor: pointer;
-      transition: all 0.3s; 
-      display: flex; 
-      align-items: center; 
-      gap: 8px;
-      box-shadow: 0 4px 6px rgba(59,130,246,0.3);
-    }
-    
-    .refresh-btn:hover {
-      background: #2563eb; 
-      transform: translateY(-2px);
-      box-shadow: 0 6px 8px rgba(59,130,246,0.4);
-    }
-    
-    .notice {
-      font-size: 14px; 
-      color: #ef4444;
-      padding: 10px 16px; 
-      background: #fff1f0;
-      border-radius: 8px; 
-      margin-top: 0;
-    }
-    
-    .code-display {
-      background: #fff; 
-      border-left: 6px solid #3b82f6;
-      padding: 20px 30px; 
-      margin-bottom: 16px;
-      border-radius: 16px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      text-align: center;
-    }
-    
-    .code-display:hover {
-      transform: translateY(-3px); 
-      box-shadow: 0 6px 20px rgba(59,130,246,0.15);
-    }
-    
-    .code-display.highlight {
-      border-color: #fbbf24; 
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse { 
-      0%   { box-shadow: 0 0 0 0   rgba(251,191,36,0.4) } 
-      70%  { box-shadow: 0 0 0 10px rgba(251,191,36,0)   } 
-      100% { box-shadow: 0 0 0 0   rgba(251,191,36,0)   } 
-    }
-    
-    .code-label {
-      font-size: 18px; 
-      font-weight: 600; 
-      color: #374151;
-      margin-bottom: 10px;
-    }
-    
-    .code-value {
-      font-size: 48px; 
-      font-weight: 800; 
-      color: #2563eb;
-      letter-spacing: 2px; 
-      text-shadow: 0 2px 4px rgba(37,99,235,0.2);
-      margin-bottom: 15px;
-    }
-    
-    .email-info {
-      font-size: 16px; 
-      color: #6b7280;
-      margin-bottom: 10px;
-    }
-    
-    .status-info {
-      font-size: 14px; 
-      color: #9ca3af;
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      gap: 6px;
-    }
-    
-    .error-display {
-      background: #fff; 
-      border-left: 6px solid #ef4444;
-      padding: 20px 30px; 
-      margin-bottom: 16px;
-      border-radius: 16px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-    
-    .error-title {
-      font-size: 24px; 
-      font-weight: 600; 
-      color: #ef4444;
-      margin-bottom: 10px;
-    }
-    
-    .error-message {
-      font-size: 16px; 
-      color: #6b7280;
-    }
-    
-    .loading {
-      background: #fff; 
-      border-left: 6px solid #3b82f6;
-      padding: 20px 30px; 
-      margin-bottom: 16px;
-      border-radius: 16px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-    
-    .loading-text {
-      font-size: 18px; 
-      color: #6b7280;
-      animation: pulse 1.5s infinite;
-    }
-
-    /* 验证码列表样式 */
-    .code-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .code-item {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      border-left: 4px solid transparent;
-    }
-
-    .code-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59,130,246,0.15);
-    }
-
-    .code-item.highlight {
-      background: #fef3c7;
-      border-left-color: #f59e0b;
-      animation: pulse 2s infinite;
-    }
-
-    .code-item-content {
-      padding: 16px 20px;
-    }
-
-    .code-item-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .email-address {
-      font-size: 14px;
-      color: #3b82f6;
-      font-weight: 600;
-    }
-
-    .code-index {
-      font-size: 12px;
-      color: #9ca3af;
-      background: #f3f4f6;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: auto;
-    }
-
-    .code-item-body {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .code-label {
-      font-size: 14px;
-      color: #374151;
-      font-weight: 500;
-    }
-
-    .code-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #2563eb;
-      letter-spacing: 1px;
-    }
-
-    .copy-btn {
-      background: #3b82f6;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 4px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .copy-btn:hover {
-      background: #2563eb;
-      transform: translateY(-1px);
-    }
-
-    .code-item-footer {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .time-stamp {
-      font-size: 12px;
-      color: #9ca3af;
-    }
-
-    /* 邮箱列表样式 */
-    .email-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-bottom: 20px;
-    }
-
-    .email-item {
-      background: #fff;
-      border-radius: 6px;
-      padding: 8px 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: all 0.2s;
-      border-left: 3px solid transparent;
-    }
-
-    .email-item.even {
-      background: #fafafa;
-    }
-
-    .email-item.odd {
-      background: #fff;
-    }
-
-    .email-item:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(59,130,246,0.15);
-    }
-
-    .email-item.has-code {
-      border-left-color: #13b07c;
-      background: #f0fdf4;
-    }
-
-    .email-item.has-code.even {
-      background: #f0fdf4;
-    }
-
-    .email-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      flex-wrap: nowrap;
-      overflow: hidden;
-      width: 100%;
-    }
-
-    .email-no {
-      font-size: 13px;
-      color: #374151;
-      font-weight: 500;
-      min-width: 200px;
-      max-width: 200px;
-      margin-right: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-
-    .email-text {
-      font-size: 13px;
-      color: #374151;
-      font-weight: 500;
-      width: 250px;
-      max-width: 250px;
-      min-width: 250px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-
-    .email-code-display {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 180px;
-      flex-shrink: 0;
-    }
-
-    .code-value {
-      font-size: 14px;
-      font-weight: 600;
-      color: #059669;
-    }
-
-    .time-text {
-      font-size: 12px;
-      color: #6b7280;
-      font-style: italic;
-    }
-
-    .email-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .fetch-btn {
-      background: #3b82f6;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      min-width: 50px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .fetch-btn:hover {
-      background: #2563eb;
-      transform: translateY(-1px);
-    }
-
-    .fetch-btn:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-      transform: none;
-      opacity: 0.6;
-    }
-
-    .fetch-btn.loading {
-      background: #f59e0b;
-    }
-
-    .copy-btn {
-      background: #10b981;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .copy-btn:hover {
-      background: #059669;
-      transform: translateY(-1px);
-    }
-
-    .email-copy-btn {
-      background: #8b5cf6;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-left: 8px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      min-width: 60px;
-    }
-
-    .email-copy-btn:hover {
-      background: #7c3aed;
-      transform: translateY(-1px);
-    }
-
-    .stop-btn {
-      background: #ef4444;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      flex-shrink: 0;
-      min-width: 50px;
-    }
-
-    .stop-btn:hover {
-      background: #dc2626;
-      transform: translateY(-1px);
-    }
-
-    .polling-status {
-      font-size: 11px;
-      color: #f59e0b;
-      font-weight: 600;
-      white-space: nowrap;
-      flex-shrink: 0;
-      min-width: 80px;
-    }
-
-    .fetch-time {
-      margin-left: 12px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      min-width: 150px;
-    }
-
-    .fetch-btn.polling {
-      background: #f59e0b;
-      animation: pulse 2s infinite;
-    }
-
-    .email-copy-btn, .copy-btn, .fetch-btn, .stop-btn {
-      transition: all 0.3s ease;
-      transform: scale(1);
-    }
-
-    .email-copy-btn:hover, .copy-btn:hover, .fetch-btn:hover, .stop-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    .email-copy-btn:active, .copy-btn:active, .fetch-btn:active, .stop-btn:active {
-      transform: scale(0.95);
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
-    }
-
-    @keyframes bounce {
-      0%, 20%, 53%, 80%, 100% {
-        transform: translate3d(0,0,0);
-      }
-      40%, 43% {
-        transform: translate3d(0, -8px, 0);
-      }
-      70% {
-        transform: translate3d(0, -4px, 0);
-      }
-      90% {
-        transform: translate3d(0, -2px, 0);
-      }
-    }
-
-    .copy-success {
-      animation: bounce 0.6s ease-out;
-    }
-
-    .operation-tip {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #1f2937;
-      color: #fff;
-      padding: 12px 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      z-index: 1000;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    .tip-content {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .tip-icon {
-      font-size: 16px;
-    }
-
-    .tip-text {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    /* 使用说明样式 */
-    .usage-guide {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      margin-top: 20px;
-      overflow: hidden;
-      border: 1px solid #e5e7eb;
-    }
-
-    .guide-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      padding: 20px 30px;
-      text-align: center;
-    }
-
-    .guide-header h2 {
-      font-size: 20px;
-      font-weight: 700;
-      margin: 0;
-    }
-
-    .guide-content {
-      padding: 30px;
-    }
-
-    .guide-section {
-      margin-bottom: 25px;
-    }
-
-    .guide-section:last-child {
-      margin-bottom: 0;
-    }
-
-    .guide-section h3 {
-      font-size: 16px;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #e5e7eb;
-    }
-
-    .guide-section ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .guide-section li {
-      padding: 8px 0;
-      color: #6b7280;
-      font-size: 14px;
-      line-height: 1.5;
-      position: relative;
-      padding-left: 20px;
-    }
-
-    .guide-section li:before {
-      content: "•";
-      color: #3b82f6;
-      font-weight: bold;
-      position: absolute;
-      left: 0;
-      top: 8px;
-    }
-
-    .guide-section strong {
-      color: #374151;
-      font-weight: 600;
-    }
-
-    /* 响应式设计 */
-    @media (max-width: 768px) {
-      body {
-        padding: 10px;
-      }
-      
-      .container {
-        max-width: 100%;
-      }
-      
-      .header {
-        padding: 15px 20px;
-      }
-      
-      .header h1 {
-        font-size: 20px;
-      }
-      
-      .guide-content {
-        padding: 20px;
-      }
-      
-      .guide-header {
-        padding: 15px 20px;
-      }
-      
-      .guide-header h2 {
-        font-size: 18px;
-      }
-      
-      .guide-section h3 {
-        font-size: 15px;
-      }
-      
-      .guide-section li {
-        font-size: 13px;
-      }
-      
-      .email-item {
-        padding: 8px 12px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      
-      .email-info {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      
-      .email-no {
-        min-width: 200px;
-        max-width: 200px;
-        font-size: 11px;
-        flex: 1;
-      }
-      
-      .email-actions {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-shrink: 0;
-      }
-      
-      /* 手机端样式 */
-      .email-code-display {
-        display: none;
-      }
-      
-      .fetch-time {
-        display: none;
-      }
-      
-      .mobile-code-line {
-        display: flex;
-      }
-      
-      /* 手机端第二行显示验证码和时间 */
-      .mobile-code-line {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-        margin-left: 33px; /* 对齐邮箱文本 */
-        font-size: 11px;
-      }
-      
-      .mobile-code-display {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      
-          .mobile-time-display {
-      color: #6b7280;
-      font-style: italic;
-    }
-    
-    /* 桌面端样式 */
-    .mobile-code-line {
-      display: none;
-    }
-    
-    .email-code-display {
-      display: inline-block;
-    }
-    
-    .fetch-time {
-      display: inline-block;
-    }
-      
-      .email-copy-btn, .copy-btn, .fetch-btn, .stop-btn {
-        font-size: 10px;
-        padding: 3px 6px;
-        min-height: 24px;
-        min-width: 44px;
-      }
-      
-      .polling-status {
-        font-size: 10px;
-      }
-      
-      .time-text {
-        font-size: 10px;
-      }
-      
-      .fetch-time {
-        margin-left: 8px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .email-no {
-        min-width: 150px;
-        max-width: 150px;
-        font-size: 10px;
-        flex: 1;
-      }
-      
-      .email-no {
-        min-width: 20px;
-        font-size: 10px;
-      }
-      
-      .email-copy-btn, .copy-btn, .fetch-btn, .stop-btn {
-        font-size: 9px;
-        padding: 2px 4px;
-        min-height: 24px;
-        min-width: 44px;
-      }
+    * { box-sizing: border-box; margin:0; padding:0 }
+    body{background:linear-gradient(135deg,#f0f9ff 0%,#e6f7ff 100%);color:#1e293b;font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,Roboto,sans-serif;padding:20px;min-height:100vh}
+    .container{max-width:800px;margin:0 auto;animation:fadeIn .5s ease-out;transform-origin:center center;transition:transform .2s}
+    .header{background:#fff;border-radius:16px;box-shadow:0 6px 20px rgba(59,130,246,.15);padding:20px 30px;margin-bottom:16px;border:1px solid #dbeafe;transition:box-shadow .3s}
+    .header.flash{animation:flashHeader 1s ease-out}
+    @keyframes flashHeader{0%{box-shadow:0 0 0 0 rgba(59,130,246,0)}50%{box-shadow:0 0 15px 5px rgba(59,130,246,.5)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .header h1{font-size:24px;font-weight:800;color:#2563eb;background:linear-gradient(90deg,#3b82f6,#1d4ed8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+    .refresh-btn{background:#3b82f6;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:8px;box-shadow:0 4px 6px rgba(59,130,246,.3)}
+    .refresh-btn:hover{background:#2563eb;transform:translateY(-2px);box-shadow:0 6px 8px rgba(59,130,246,.4)}
+    .notice{font-size:14px;color:#ef4444;padding:10px 16px;background:#fff1f0;border-radius:8px;margin-top:0}
+
+    /* 列表 */
+    .email-list{display:flex;flex-direction:column;gap:4px;margin-bottom:20px}
+    .email-item{background:#fff;border-radius:6px;padding:8px 12px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:space-between;transition:all .2s;border-left:3px solid transparent}
+    .email-item.even{background:#fafafa}
+    .email-item:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(59,130,246,.15)}
+    .email-item.has-code{border-left-color:#13b07c;background:#f0fdf4}
+    .email-item.has-code.even{background:#f0fdf4}
+
+    .email-info{display:flex;align-items:center;gap:8px;flex:1;flex-wrap:nowrap;overflow:hidden;width:100%}
+    .email-no{font-size:13px;color:#374151;font-weight:500;min-width:200px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+    .email-copy-btn{background:#8b5cf6;color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;min-width:60px}
+    .email-copy-btn:hover{background:#7c3aed;transform:translateY(-1px)}
+
+    .email-code-display{display:flex;align-items:center;gap:8px;min-width:220px;flex-shrink:0}
+    .code-value{font-size:14px;font-weight:600;color:#059669}
+    .copy-btn{background:#10b981;color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+    .copy-btn:hover{background:#059669;transform:translateY(-1px)}
+    .time-text{font-size:12px;color:#6b7280;font-style:italic}
+
+    .polling-status{font-size:11px;color:#f59e0b;font-weight:600;white-space:nowrap;flex-shrink:0;min-width:80px}
+    .stop-btn{background:#ef4444;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;min-width:50px}
+    .stop-btn:hover{background:#dc2626;transform:translateY(-1px)}
+    .fetch-btn{background:#3b82f6;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;min-width:50px;white-space:nowrap;flex-shrink:0}
+    .fetch-btn:hover{background:#2563eb;transform:translateY(-1px)}
+    .fetch-btn:disabled{background:#9ca3af;cursor:not-allowed;transform:none;opacity:.6}
+    .fetch-btn.polling{background:#f59e0b;animation:pulse 2s infinite}
+
+    .mobile-code-line{display:none}
+    @keyframes pulse{0%{opacity:1}50%{opacity:.7}100%{opacity:1}}
+
+    /* 使用说明 & 其它样式保持不变（略去无关项以便阅读） */
+    .loading{background:#fff;border-left:6px solid #3b82f6;padding:20px 30px;margin-bottom:16px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.08);text-align:center}
+    .loading-text{font-size:18px;color:#6b7280;animation:pulse 1.5s infinite}
+    .usage-guide{background:#fff;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.08);margin-top:20px;overflow:hidden;border:1px solid #e5e7eb}
+    .guide-header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:20px 30px;text-align:center}
+    .guide-header h2{font-size:20px;font-weight:700;margin:0}
+    .guide-content{padding:30px}
+    .guide-section{margin-bottom:25px}
+    .guide-section:last-child{margin-bottom:0}
+    .guide-section h3{font-size:16px;font-weight:600;color:#374151;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e5e7eb}
+    .guide-section ul{list-style:none;padding:0;margin:0}
+    .guide-section li{padding:8px 0;color:#6b7280;font-size:14px;line-height:1.5;position:relative;padding-left:20px}
+    .guide-section li:before{content:"•";color:#3b82f6;font-weight:bold;position:absolute;left:0;top:8px}
+
+    /* 手机端 */
+    @media (max-width:768px){
+      .email-item{flex-direction:column;align-items:flex-start;gap:8px}
+      .email-info{justify-content:space-between}
+      .email-no{min-width:200px;max-width:200px;font-size:11px;flex:1}
+      .email-code-display,.time-text{display:none}
+      .mobile-code-line{display:flex;align-items:center;gap:8px;width:100%;margin-left:33px;font-size:11px}
+      .mobile-time-display{color:#6b7280;font-style:italic}
+    }
+    @media (max-width:480px){
+      .email-no{min-width:150px;max-width:150px;font-size:10px}
+      .email-copy-btn,.copy-btn,.fetch-btn,.stop-btn{font-size:9px;padding:2px 4px;min-height:24px;min-width:44px}
     }
   </style>
 </head>
@@ -829,32 +84,23 @@
       <div class="header-top">
         <h1>验证码列表</h1>
         <button class="refresh-btn" id="refreshBtn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-            <path d="M3 3v5h5"/>
-            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-            <path d="M16 16h5v5"/>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
           刷新
         </button>
       </div>
       <div class="notice">如果验证码一直没来请联系 A Kun</div>
-
     </div>
-    
+
     <div id="content">
       <div class="loading">
         <div class="loading-text">正在加载邮箱列表，请稍候...</div>
-        <div id="timerStatus" style="font-size: 12px; color: #666; margin-top: 10px;"></div>
+        <div id="timerStatus" style="font-size:12px;color:#666;margin-top:10px;"></div>
       </div>
     </div>
-    
-    <!-- 使用说明 -->
+
+    <!-- 使用说明（原样保留） -->
     <div class="usage-guide">
-      <div class="guide-header">
-        <h2>📖 使用说明</h2>
-      </div>
+      <div class="guide-header"><h2>📖 使用说明</h2></div>
       <div class="guide-content">
         <div class="guide-section">
           <h3>🎯 基本操作</h3>
@@ -864,765 +110,312 @@
             <li><strong>刷新</strong>：点击右上角"刷新"按钮重新获取邮箱列表</li>
           </ul>
         </div>
-        
         <div class="guide-section">
           <h3>📋 功能说明</h3>
           <ul>
             <li><strong>查询机制</strong>：每次只能查询一个邮箱，开始新查询会自动停止其他查询</li>
             <li><strong>查询时长</strong>：每个邮箱查询5分钟，自动停止</li>
             <li><strong>验证码更新</strong>：只有发现新验证码才会更新显示，避免重复</li>
-            <li><strong>时间显示</strong>：显示验证码在的实际获取时间</li>
+            <li><strong>时间显示</strong>：显示验证码的实际获取时间</li>
           </ul>
         </div>
-        
         <div class="guide-section">
           <h3>📋 复制功能</h3>
           <ul>
             <li><strong>邮箱复制</strong>：点击邮箱地址后的紫色"邮箱复制"按钮</li>
             <li><strong>验证码复制</strong>：点击验证码后的绿色"码复制"按钮</li>
-            <li><strong>复制反馈</strong>：复制成功会显示"已复制"，1秒后恢复</li>
+            <li><strong>复制反馈</strong>：复制成功会显示"已复制"</li>
           </ul>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    // 配置
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwB6O-K_c0fudZY-02_qhGG_1-tlUIU7YnnEPScYsmZIVIZj2-M_HuREy60HJGf5AerXQ/exec';
-    const REFRESH_INTERVAL = 3000; // 3秒刷新一次
-    let lastCode = null;
-    let refreshTimer = null;
-    let emailList = [];
-    
-    // 设备检测
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    console.log('设备检测结果:', isMobile ? '手机端' : '电脑端');
-    
-    // 查询状态管理
-    let pollingIntervals = {}; // 存储每个邮箱的查询定时器
-    let pollingStatus = {}; // 存储每个邮箱的查询状态
-    const POLLING_DURATION = 5 * 60 * 1000; // 5分钟查询时间
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbwB6O-K_c0fudZY-02_qhGG_1-tlUIU7YnnEPScYsmZIVIZj2-M_HuREy60HJGf5AerXQ/exec';
+const REFRESH_INTERVAL = 3000;
+let emailList = [];
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
-    // 格式化时间
-    function formatTime(date) {
-      return date.toLocaleString('zh-CN', { 
-        timeZone: 'Asia/Shanghai',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-    }
+// 轮询状态
+let pollingIntervals = {};
+let pollingStatus = {};
+const POLLING_DURATION = 5 * 60 * 1000;
 
-    // 闪烁标题
-    function flashHeader() {
-      const header = document.querySelector('.header');
-      header.classList.add('flash');
-      setTimeout(() => header.classList.remove('flash'), 1000);
-    }
+// 初始化
+if (document.readyState === 'complete') { initializeCodeCollection(); }
+else { window.addEventListener('load', initializeCodeCollection); }
 
-    // 渲染验证码显示
-    function renderCodeDisplay(data, targetEmail) {
-      // 找到对应邮箱的验证码显示区域
-      const emailIndex = emailList.findIndex(email => email === targetEmail);
-      if (emailIndex === -1) {
-        console.error('未找到对应邮箱:', targetEmail);
-        return;
-      }
-      
-      const codeDisplayArea = document.getElementById(`codeDisplay-${emailIndex}`);
-      const emailItem = document.querySelector(`[data-email="${targetEmail}"]`);
-      
-      if (!emailItem) {
-        console.error('未找到邮箱项:', targetEmail);
-        return;
-      }
-      
-            if (data.error) {
-        if (isMobile) {
-          const mobileCodeLine = document.getElementById(`mobileCodeLine-${emailIndex}`);
-          if (mobileCodeLine) {
-            mobileCodeLine.innerHTML = `<span style="color: #ef4444;">❌ ${data.error}</span>`;
-          }
-        } else {
-          if (codeDisplayArea) {
-            // 显示错误信息
-            codeDisplayArea.querySelector('.code-value').textContent = `❌ ${data.error}`;
-            codeDisplayArea.querySelector('.code-value').style.color = '#ef4444';
-            const copyBtn = codeDisplayArea.querySelector('.copy-btn');
-            copyBtn.style.display = 'none';
-            
-            // 清空时间
-            const fetchTimeElement = codeDisplayArea.querySelector(`#fetchTime-${emailIndex}`);
-            if (fetchTimeElement) {
-              fetchTimeElement.textContent = '';
-            }
-          }
-        }
-        emailItem.classList.remove('has-code');
-        return;
-      }
+document.getElementById('refreshBtn').addEventListener('click', fetchEmailList);
 
-      // 如果有验证码数据，检查是否是新码
-      if (data.codes && data.codes.length > 0) {
-        const latestCode = data.codes[0];
-        
-        // 格式化Google Sheet的时间
-        const sheetTime = latestCode.time ? new Date(latestCode.time).toLocaleTimeString('zh-CN') : new Date().toLocaleTimeString('zh-CN');
-        
-        if (isMobile) {
-          // 手机端：更新第二行
-          const mobileCodeLine = document.getElementById(`mobileCodeLine-${emailIndex}`);
-          if (mobileCodeLine) {
-            mobileCodeLine.innerHTML = `
-              <div class="mobile-code-display">
-                ${latestCode.code}
-                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')" ontouchstart="copyToClipboard('${latestCode.code}')">码复制</button>
-              </div>
-              <div class="mobile-time-display">来码时间: ${sheetTime}</div>
-            `;
-          }
-        } else {
-          // 电脑端：更新第一行
-          if (codeDisplayArea) {
-            // 显示验证码 + 复制按钮
-            codeDisplayArea.querySelector('.code-value').textContent = latestCode.code;
-            const copyBtn = codeDisplayArea.querySelector('.copy-btn');
-            copyBtn.style.display = 'inline-block';
-            copyBtn.onclick = () => copyToClipboard(latestCode.code);
-            copyBtn.ontouchstart = () => copyToClipboard(latestCode.code);
-
-            // 更新时间
-            const fetchTimeElement = codeDisplayArea.querySelector(`#fetchTime-${emailIndex}`);
-            if (fetchTimeElement) {
-              fetchTimeElement.textContent = `来码时间: ${sheetTime}`;
-            }
-          }
-        }
-        
-        emailItem.classList.add('has-code');
-      } else {
-        // 没有验证码
-        if (isMobile) {
-          const mobileCodeLine = document.getElementById(`mobileCodeLine-${emailIndex}`);
-          if (mobileCodeLine) {
-            mobileCodeLine.innerHTML = '';
-          }
-        } else {
-          if (codeDisplayArea) {
-            // 隐藏验证码和复制按钮
-            codeDisplayArea.querySelector('.code-value').textContent = '';
-            const copyBtn = codeDisplayArea.querySelector('.copy-btn');
-            copyBtn.style.display = 'none';
-            
-            // 清空时间
-            const fetchTimeElement = codeDisplayArea.querySelector(`#fetchTime-${emailIndex}`);
-            if (fetchTimeElement) {
-              fetchTimeElement.textContent = '';
-            }
-          }
-        }
-        
-        emailItem.classList.remove('has-code');
-      }
-    }
-
-    // 获取验证码数据 - 使用JSONP方式避免CORS问题
-    function fetchCode() {
-      console.log('fetchCode 被调用，时间:', new Date().toLocaleTimeString());
-      
-      // 创建唯一的回调函数名
-      const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
-      // 创建script标签
-      const script = document.createElement('script');
-      script.src = API_URL + '?callback=' + callbackName;
-      
-      // 设置超时
-      const timeout = setTimeout(() => {
-        window[callbackName] = null;
-        document.head.removeChild(script);
-        console.log('全局请求超时');
-      }, 10000); // 10秒超时
-      
-      // 定义回调函数
-      window[callbackName] = function(data) {
-        clearTimeout(timeout);
-        window[callbackName] = null;
-        document.head.removeChild(script);
-        
-        console.log('全局JSONP回调收到数据:', data);
-        
-        try {
-        if (data.status === 'OK' && data.data) {
-            console.log('全局验证码数据:', data.data);
-            // 全局获取不显示到特定邮箱，只记录日志
-        } else if (data.status === 'ERROR') {
-            console.log('全局服务错误:', data.message);
-        } else {
-            console.log('全局未知响应格式:', data);
-        }
-      } catch (error) {
-          console.error('全局解析响应失败:', error);
-        }
-      };
-      
-      // 处理加载错误
-      script.onerror = function() {
-        clearTimeout(timeout);
-        window[callbackName] = null;
-        document.head.removeChild(script);
-        console.error('全局JSONP请求失败，API地址:', API_URL);
-      };
-      
-      // 添加到页面
-      document.head.appendChild(script);
-    }
-
-    // 手动刷新
-    document.getElementById('refreshBtn').addEventListener('click', () => {
-      console.log('手动刷新邮箱列表');
-      fetchEmailList();
+function initializeCodeCollection(){
+  fetchEmailList();
+  // 每秒刷新倒计时文本
+  setInterval(() => {
+    Object.keys(pollingStatus).forEach(email => {
+      const st = pollingStatus[email];
+      if (st && st.isActive) updatePollingDisplay(email);
     });
+  }, 1000);
+}
 
-    // 页面可见性变化时不刷新邮箱列表
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        console.log('页面变为可见，不刷新邮箱列表');
-      }
-    });
+// 获取邮箱列表(JSONP)
+function fetchEmailList(){
+  const cb = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  const s = document.createElement('script');
+  s.src = API_URL + '?action=getEmailList&callback=' + cb;
+  const to = setTimeout(() => { cleanup(); renderEmailList([]); }, 10000);
 
-    // 更新定时器状态显示
-    function updateTimerStatus() {
-      const timerStatus = document.getElementById('timerStatus');
-      if (timerStatus) {
-        const now = new Date();
-        timerStatus.textContent = `定时器状态: ${refreshTimer ? '运行中' : '已停止'} | 上次更新: ${now.toLocaleTimeString()} | 下次更新: ${new Date(now.getTime() + REFRESH_INTERVAL).toLocaleTimeString()}`;
-      }
-    }
-
-    // 初始化 - 页面完全加载后获取邮箱列表
-    function initializeCodeCollection() {
-      console.log('页面已完全加载，开始获取邮箱列表...');
-      
-      // 显示API地址
-      const apiUrlDisplay = document.getElementById('apiUrlDisplay');
-      if (apiUrlDisplay) {
-        apiUrlDisplay.textContent = API_URL;
-      }
-      
-      // 更新加载提示
-      const loadingText = document.querySelector('.loading-text');
-      if (loadingText) {
-        loadingText.textContent = '页面已加载完成，正在获取邮箱列表...';
-      }
-      
-      console.log('开始获取邮箱列表，API地址:', API_URL);
-      fetchEmailList();
-      
-      // 设置定时器更新查询状态显示（只更新倒计时，不重新渲染列表）
-      setInterval(() => {
-        Object.keys(pollingStatus).forEach(email => {
-          if (pollingStatus[email] && pollingStatus[email].isActive) {
-            const emailItem = document.querySelector(`[data-email="${email}"]`);
-            if (emailItem) {
-              const remainingTime = Math.ceil((pollingStatus[email].endTime - Date.now()) / 1000);
-              const pollingStatusElement = emailItem.querySelector('.polling-status');
-              if (pollingStatusElement && remainingTime > 0) {
-                pollingStatusElement.textContent = `查询中 (${remainingTime}s)`;
-              }
-            }
-          }
-        });
-      }, 1000); // 每秒更新一次倒计时
-    }
-
-    // 页面完全加载后开始初始化
-    if (document.readyState === 'complete') {
-      initializeCodeCollection();
+  window[cb] = (data) => {
+    clearTimeout(to); cleanup();
+    if (data.status === 'OK' && data.emails) {
+      emailList = data.emails;
+      renderEmailList(emailList);
     } else {
-      window.addEventListener('load', initializeCodeCollection);
+      renderEmailList([]);
     }
-    
-    // 获取邮箱列表
-    function fetchEmailList() {
-      console.log('获取邮箱列表...');
-      
-      // 创建唯一的回调函数名
-      const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
-      // 清理可能存在的同名回调函数
-      if (window[callbackName]) {
-        window[callbackName] = null;
-      }
-      
-      // 创建script标签
-      const script = document.createElement('script');
-      script.src = API_URL + '?action=getEmailList&callback=' + callbackName;
-      
-      // 设置超时
-      const timeout = setTimeout(() => {
-        if (window[callbackName]) {
-          window[callbackName] = null;
-        }
-        if (script.parentNode) {
-          document.head.removeChild(script);
-        }
-        renderEmailList([]);
-      }, 10000);
-      
-      // 定义回调函数
-      window[callbackName] = function(data) {
-        clearTimeout(timeout);
-        
-        // 清理回调函数和script标签
-        if (window[callbackName]) {
-          window[callbackName] = null;
-        }
-        if (script.parentNode) {
-          document.head.removeChild(script);
-        }
-        
-        console.log('邮箱列表回调收到数据:', data);
-        
-        try {
-          if (data.status === 'OK' && data.emails) {
-            emailList = data.emails;
-            renderEmailList(emailList);
-          } else {
-            console.log('获取邮箱列表失败:', data.message);
-            renderEmailList([]);
-          }
-        } catch (error) {
-          console.error('解析邮箱列表失败:', error);
-          renderEmailList([]);
-        }
-      };
-      
-      // 处理加载错误
-      script.onerror = function() {
-        clearTimeout(timeout);
-        if (window[callbackName]) {
-          window[callbackName] = null;
-        }
-        if (script.parentNode) {
-          document.head.removeChild(script);
-        }
-        console.error('获取邮箱列表失败');
-        renderEmailList([]);
-      };
-      
-      // 添加到页面
-      document.head.appendChild(script);
+  };
+
+  s.onerror = () => { clearTimeout(to); cleanup(); renderEmailList([]); };
+  document.head.appendChild(s);
+
+  function cleanup(){ try{ document.head.removeChild(s);}catch{} delete window[cb]; }
+}
+
+// 渲染列表
+function renderEmailList(emails){
+  const content = document.getElementById('content');
+  if (!emails.length){
+    content.innerHTML = `
+      <div class="loading"><div class="loading-text">未获取到邮箱列表</div></div>
+    `;
+    return;
+  }
+
+  const html = emails.map((email, index) => {
+    const isEven = index % 2 === 0;
+
+    if (isMobile){
+      // 手机端：按钮单独一行，验证码/时间在第二行
+      return `
+      <div class="email-item ${isEven ? 'even':'odd'}" data-email="${email}" data-index="${index}">
+        <div class="email-info">
+          <span class="email-no">${index+1}. ${email}</span>
+          <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
+        </div>
+
+        <div class="email-info">
+          <span class="polling-status" id="polling-${index}"></span>
+          <button class="stop-btn" id="stop-${index}" style="display:none" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">停止</button>
+          <button class="fetch-btn" id="fetch-${index}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)">取码</button>
+        </div>
+
+        <div class="mobile-code-line" id="mobileCodeLine-${index}"></div>
+      </div>`;
     }
 
-    // 渲染邮箱列表
-    function renderEmailList(emails) {
-      const content = document.getElementById('content');
-      
-      if (emails.length === 0) {
-        content.innerHTML = `
-          <div class="error-display">
-            <div class="error-title">❌ 获取邮箱列表失败</div>
-            <div class="error-message">请检查GAS代码和email工作表</div>
+    // 桌面端：一行包括邮箱/复制/验证码/时间/状态/停止/取码
+    return `
+    <div class="email-item ${isEven ? 'even':'odd'}" data-email="${email}" data-index="${index}">
+      <div class="email-info">
+        <span class="email-no">${index+1}. ${email}</span>
+        <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
+
+        <span class="email-code-display" id="codeDisplay-${index}">
+          <span class="code-value"></span>
+          <button class="copy-btn" id="copyCodeBtn-${index}" style="display:none">码复制</button>
+          <span class="time-text" id="fetchTime-${index}"></span>
+        </span>
+
+        <span class="polling-status" id="polling-${index}"></span>
+        <button class="stop-btn" id="stop-${index}" style="display:none" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">停止</button>
+        <button class="fetch-btn" id="fetch-${index}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)">取码</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  content.innerHTML = `<div class="email-list">${html}</div>`;
+}
+
+// 单次查询（JSONP）
+function fetchCodeOnce(email, button){
+  const emailIndex = emailList.findIndex(e => e === email);
+
+  // 取当前显示的验证码（桌面端）
+  let currentCode = null;
+  if (emailIndex !== -1 && !isMobile){
+    const valEl = document.querySelector(`#codeDisplay-${emailIndex} .code-value`);
+    if (valEl) currentCode = (valEl.textContent || '').trim();
+  }
+
+  const cb = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  const s = document.createElement('script');
+  let url = API_URL + '?email=' + encodeURIComponent(email) + '&callback=' + cb;
+  if (currentCode) url += '&currentCode=' + encodeURIComponent(currentCode);
+  s.src = url;
+
+  const to = setTimeout(() => { cleanup(); console.log('查询超时', email); }, 10000);
+
+  window[cb] = (data) => {
+    clearTimeout(to); cleanup();
+    if (data.status === 'OK' && data.data){
+      renderCodeDisplay(data.data, email);
+    }
+  };
+
+  document.head.appendChild(s);
+  function cleanup(){ try{ document.head.removeChild(s);}catch{} delete window[cb]; }
+}
+
+// 渲染验证码到对应行
+function renderCodeDisplay(data, targetEmail){
+  const index = emailList.findIndex(e => e === targetEmail);
+  if (index === -1) return;
+
+  const emailItem = document.querySelector(`[data-email="${targetEmail}"]`);
+  if (!emailItem) return;
+
+  if (data.error){
+    if (isMobile){
+      const line = document.getElementById(`mobileCodeLine-${index}`);
+      if (line) line.innerHTML = `<span style="color:#ef4444;">❌ ${data.error}</span>`;
+    }else{
+      const codeBox = document.getElementById(`codeDisplay-${index}`);
+      if (codeBox){
+        codeBox.querySelector('.code-value').textContent = `❌ ${data.error}`;
+        codeBox.querySelector('.code-value').style.color = '#ef4444';
+        const copyBtn = document.getElementById(`copyCodeBtn-${index}`);
+        if (copyBtn) copyBtn.style.display = 'none';
+        const timeEl = document.getElementById(`fetchTime-${index}`);
+        if (timeEl) timeEl.textContent = '';
+      }
+    }
+    emailItem.classList.remove('has-code');
+    return;
+  }
+
+  // 有验证码
+  if (data.codes && data.codes.length){
+    const latest = data.codes[0];
+    const sheetTime = latest.time ? new Date(latest.time).toLocaleTimeString('zh-CN') : new Date().toLocaleTimeString('zh-CN');
+
+    if (isMobile){
+      const line = document.getElementById(`mobileCodeLine-${index}`);
+      if (line){
+        line.innerHTML = `
+          <div class="mobile-code-display">
+            ${latest.code}
+            <button class="copy-btn" onclick="copyToClipboard('${latest.code}')" ontouchstart="copyToClipboard('${latest.code}')">码复制</button>
           </div>
-        `;
-        return;
+          <div class="mobile-time-display">来码时间: ${sheetTime}</div>`;
       }
-
-      const emailListHTML = emails.map((email, index) => {
-        const isPolling = pollingStatus[email] && pollingStatus[email].isActive;
-        const remainingTime = isPolling ? Math.ceil((pollingStatus[email].endTime - Date.now()) / 1000) : 0;
-        const isEven = index % 2 === 0;
-        
-        if (isMobile) {
-          // 手机端：图2样式
-          return `
-            <div class="email-item ${isEven ? 'even' : 'odd'}" data-email="${email}" data-index="${index}">
-              <div class="email-info">
-                <span class="email-no">${index + 1}. ${email}</span>
-                <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
-              </div>
-              <div class="email-actions">
-                ${isPolling ? `<span class="polling-status">查询中 (${remainingTime}s)</span>` : ''}
-                ${isPolling ? `
-                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">
-                    停止
-                  </button>
-                ` : ''}
-                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)" ${isPolling ? 'disabled' : ''}>
-                  ${isPolling ? '查询中' : '取码'}
-                </button>
-              </div>
-              <div class="mobile-code-line" id="mobileCodeLine-${index}"></div>
-            </div>
-          `;
-                } else {
-          // 桌面端：一行显示所有内容
-          return `
-            <div class="email-item ${isEven ? 'even' : 'odd'}" data-email="${email}" data-index="${index}">
-              <div class="email-info">
-                <span class="email-no">${index + 1}. ${email}</span>
-                <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
-                
-                <span class="email-code-display" id="codeDisplay-${index}">
-                  <span class="code-value"></span>
-                  <button class="copy-btn" style="display:none">码复制</button>
-                  <span class="time-text" id="fetchTime-${index}"></span>
-                </span>
-
-                ${isPolling ? `<span class="polling-status">查询中 (${remainingTime}s)</span>` : ''}
-                ${isPolling ? `
-                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">停止</button>
-                ` : ''}
-                <button class="fetch-btn ${isPolling ? 'polling' : ''}" 
-                        onclick="fetchCodeForEmail('${email}', this)" 
-                        ontouchstart="fetchCodeForEmail('${email}', this)" 
-                        ${isPolling ? 'disabled' : ''}>
-                  ${isPolling ? '查询中' : '取码'}
-                </button>
-              </div>
-            </div>
-          `;
+    }else{
+      const codeBox = document.getElementById(`codeDisplay-${index}`);
+      if (codeBox){
+        codeBox.querySelector('.code-value').style.color = '#059669';
+        codeBox.querySelector('.code-value').textContent = latest.code;
+        const copyBtn = document.getElementById(`copyCodeBtn-${index}`);
+        if (copyBtn){
+          copyBtn.style.display = 'inline-block';
+          copyBtn.onclick = () => copyToClipboard(latest.code);
+          copyBtn.ontouchstart = () => copyToClipboard(latest.code);
         }
-      }).join('');
-
-      content.innerHTML = `
-        <div class="email-list">
-          ${emailListHTML}
-        </div>
-      `;
-    }
-
-    // 为指定邮箱获取验证码
-    function fetchCodeForEmail(email, button) {
-      console.log('fetchCodeForEmail 被调用:', email);
-      if (button && button.disabled) return;
-      
-      // 如果已经在查询中，直接忽略，不要停止
-      if (pollingStatus[email] && pollingStatus[email].isActive) {
-        console.log('已经在查询中:', email);
-        return;
-      }
-      
-      // 开始查询
-      console.log('开始查询:', email);
-      startPolling(email, button);
-    }
-
-    // 开始查询指定邮箱
-    function startPolling(email, button) {
-      console.log('开始查询邮箱:', email);
-      
-      // 停止所有其他查询
-      Object.keys(pollingStatus).forEach(otherEmail => {
-        if (otherEmail !== email && pollingStatus[otherEmail] && pollingStatus[otherEmail].isActive) {
-          console.log('停止其他查询:', otherEmail);
-          stopPolling(otherEmail);
-        }
-      });
-      
-      // 设置轮询状态
-      pollingStatus[email] = {
-        isActive: true,
-        startTime: Date.now(),
-        endTime: Date.now() + POLLING_DURATION
-      };
-      
-      console.log('轮询状态已设置:', pollingStatus[email]);
-      
-      // 立即执行一次获取
-      fetchCodeOnce(email, button);
-      
-      // 设置定时器，每3秒查询一次
-      pollingIntervals[email] = setInterval(() => {
-        console.log('定时器触发，检查剩余时间:', email);
-        const remainingTime = pollingStatus[email].endTime - Date.now();
-        console.log('剩余时间:', remainingTime, 'ms');
-        
-        if (remainingTime <= 0) {
-          // 查询时间结束
-          console.log('查询时间结束，停止轮询:', email);
-          stopPolling(email);
-          return;
-        }
-        
-        // 继续查询
-        console.log('继续查询:', email);
-        fetchCodeOnce(email, button);
-      }, REFRESH_INTERVAL);
-      
-      console.log('定时器已设置，ID:', pollingIntervals[email], '间隔:', REFRESH_INTERVAL, 'ms');
-      
-      // 设置查询结束定时器
-      setTimeout(() => {
-        console.log('查询结束定时器触发:', email);
-        stopPolling(email);
-      }, POLLING_DURATION);
-      
-      // 更新UI显示
-      updatePollingDisplay(email);
-      
-      // 显示操作提示
-      showOperationTip(email, '开始查询');
-    }
-
-    // 停止查询指定邮箱
-    function stopPolling(email) {
-      console.log('停止查询邮箱:', email);
-      
-      // 清除定时器
-      if (pollingIntervals[email]) {
-        clearInterval(pollingIntervals[email]);
-        delete pollingIntervals[email];
-      }
-      
-      // 清除查询状态
-      if (pollingStatus[email]) {
-        pollingStatus[email].isActive = false;
-        console.log('查询状态已清除:', email, pollingStatus[email]);
-      }
-      
-      // 更新UI显示
-      updatePollingDisplay(email);
-      
-      // 显示操作提示
-      showOperationTip(email, '查询结束');
-    }
-
-    // 停止查询指定邮箱（供按钮调用）
-    function stopPollingForEmail(email, button) {
-      console.log('stopPollingForEmail 被调用:', email);
-      stopPolling(email);
-    }
-
-    // 单次获取验证码
-    function fetchCodeOnce(email, button) {
-      console.log('查询获取验证码:', email);
-      
-      // 获取当前显示的验证码
-      const emailIndex = emailList.findIndex(e => e === email);
-      let currentCode = null;
-      if (emailIndex !== -1) {
-        if (isMobile) {
-          // 手机端：从mobile-code-line获取
-          const mobileCodeLine = document.getElementById(`mobileCodeLine-${emailIndex}`);
-          if (mobileCodeLine) {
-            const codeElement = mobileCodeLine.querySelector('.mobile-code-display');
-            if (codeElement) {
-              currentCode = codeElement.textContent.trim().split(' ')[0];
-            }
-          }
-        } else {
-          // 电脑端：从email-code-display获取
-          const codeDisplayArea = document.getElementById(`codeDisplay-${emailIndex}`);
-          if (codeDisplayArea) {
-            const currentCodeElement = codeDisplayArea.querySelector('.email-code-display.has-code');
-            if (currentCodeElement) {
-              currentCode = currentCodeElement.textContent.trim().split(' ')[0];
-            }
-          }
-        }
-      }
-      
-      // 创建唯一的回调函数名
-      const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
-      // 清理可能存在的同名回调函数
-      if (window[callbackName]) {
-        window[callbackName] = null;
-      }
-      
-      // 创建script标签
-      const script = document.createElement('script');
-      let url = API_URL + '?email=' + encodeURIComponent(email) + '&callback=' + callbackName;
-      if (currentCode) {
-        url += '&currentCode=' + encodeURIComponent(currentCode);
-      }
-      script.src = url;
-      
-      // 设置超时
-      const timeout = setTimeout(() => {
-        if (window[callbackName]) {
-          window[callbackName] = null;
-        }
-        if (script.parentNode) {
-          document.head.removeChild(script);
-        }
-        console.log('查询请求超时:', email);
-      }, 10000); // 10秒超时
-      
-      // 定义回调函数
-      window[callbackName] = function(data) {
-        clearTimeout(timeout);
-        
-        // 清理回调函数和script标签
-        if (window[callbackName]) {
-          window[callbackName] = null;
-        }
-        if (script.parentNode) {
-          document.head.removeChild(script);
-        }
-        
-        console.log('查询回调收到数据:', data);
-        console.log('当前轮询状态:', pollingStatus[email]);
-        
-        try {
-          if (data.status === 'OK' && data.data) {
-            console.log('查询验证码数据:', data.data);
-            renderCodeDisplay(data.data, email);
-          } else if (data.status === 'ERROR') {
-            console.log('查询服务错误:', data.message);
-          } else {
-            console.log('查询未知响应格式:', data);
-          }
-        } catch (error) {
-          console.error('轮询处理响应时出错:', error);
-        }
-      };
-      
-      // 添加script标签到页面
-      document.head.appendChild(script);
-    }
-
-    // 更新查询显示
-    function updatePollingDisplay(email) {
-      // 只更新特定邮箱的查询状态，不重新渲染整个列表
-      const emailIndex = emailList.findIndex(e => e === email);
-      if (emailIndex !== -1) {
-        const emailItem = document.querySelector(`[data-email="${email}"]`);
-        if (emailItem) {
-          const isPolling = pollingStatus[email] && pollingStatus[email].isActive;
-          const remainingTime = isPolling ? Math.ceil((pollingStatus[email].endTime - Date.now()) / 1000) : 0;
-          
-          // 更新查询状态显示
-          const pollingStatusElement = emailItem.querySelector('.polling-status');
-          if (pollingStatusElement) {
-            pollingStatusElement.textContent = isPolling ? `查询中 (${remainingTime}s)` : '';
-          }
-          
-          // 更新按钮状态
-          const fetchBtn = emailItem.querySelector('.fetch-btn');
-          if (fetchBtn) {
-            fetchBtn.textContent = isPolling ? '查询中' : '取码';
-            fetchBtn.className = `fetch-btn ${isPolling ? 'polling' : ''}`;
-            fetchBtn.disabled = isPolling;
-          }
-          
-          // 更新停止按钮
-          const stopBtn = emailItem.querySelector('.stop-btn');
-          if (isPolling) {
-            if (!stopBtn) {
-              const emailInfo = emailItem.querySelector('.email-info');
-              const newStopBtn = document.createElement('button');
-              newStopBtn.className = 'stop-btn';
-              newStopBtn.textContent = '停止';
-              newStopBtn.onclick = () => stopPollingForEmail(email, newStopBtn);
-              newStopBtn.ontouchstart = () => stopPollingForEmail(email, newStopBtn);
-              // 插入到取码按钮之前
-              const fetchBtn = emailItem.querySelector('.fetch-btn');
-              emailInfo.insertBefore(newStopBtn, fetchBtn);
-            }
-          } else {
-            if (stopBtn) {
-              stopBtn.remove();
-            }
-          }
-        }
+        const timeEl = document.getElementById(`fetchTime-${index}`);
+        if (timeEl) timeEl.textContent = `来码时间: ${sheetTime}`;
       }
     }
-
-    // 显示操作提示
-    function showOperationTip(email, action) {
-      const tip = document.createElement('div');
-      tip.className = 'operation-tip';
-      tip.innerHTML = `
-        <div class="tip-content">
-          <span class="tip-icon">${action === '开始轮询' ? '🔄' : '✅'}</span>
-          <span class="tip-text">${email} ${action}</span>
-        </div>
-      `;
-      
-      document.body.appendChild(tip);
-      
-      // 3秒后自动移除
-      setTimeout(() => {
-        if (tip.parentNode) {
-          tip.parentNode.removeChild(tip);
-        }
-      }, 3000);
-    }
-
-    // 处理获取错误
-    function handleFetchError(button, message) {
-      button.textContent = '失败';
-      button.style.background = '#ef4444';
-      setTimeout(() => {
-        button.disabled = false;
-        button.classList.remove('loading');
-        button.textContent = '取码';
-        button.style.background = '#3b82f6';
-      }, 2000);
-      
-      // 找到对应邮箱的验证码显示区域
-      const emailItem = button.closest('.email-item');
-      if (emailItem) {
-        const codeDisplayArea = emailItem.querySelector('.email-code-display');
-        if (codeDisplayArea) {
-          codeDisplayArea.innerHTML = `<span style="color: #ef4444;">❌ ${message}</span>`;
-          emailItem.classList.remove('has-code');
-        }
+    emailItem.classList.add('has-code');
+  }else{
+    // 清空
+    if (isMobile){
+      const line = document.getElementById(`mobileCodeLine-${index}`);
+      if (line) line.innerHTML = '';
+    }else{
+      const codeBox = document.getElementById(`codeDisplay-${index}`);
+      if (codeBox){
+        codeBox.querySelector('.code-value').textContent = '';
+        const copyBtn = document.getElementById(`copyCodeBtn-${index}`);
+        if (copyBtn) copyBtn.style.display = 'none';
+        const timeEl = document.getElementById(`fetchTime-${index}`);
+        if (timeEl) timeEl.textContent = '';
       }
     }
+    emailItem.classList.remove('has-code');
+  }
+}
 
-    // 复制到剪贴板功能
-    function copyToClipboard(text) {
-      // 降级方案 - 直接使用execCommand
-      try {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textArea);
-        
-        if (successful) {
-          // 显示复制成功提示
-          const copyBtn = event.target;
-          let message = '';
-          
-          // 根据按钮类型显示不同的提示信息
-          if (copyBtn.classList.contains('email-copy-btn')) {
-            message = '邮箱已复制';
-          } else {
-            message = '码已复制';
-          }
-          
-          // 显示操作提示
-          showOperationTip(text, message);
-        } else {
-          showOperationTip(text, '复制失败');
-        }
-      } catch (err) {
-        console.error('复制失败:', err);
-        showOperationTip(text, '复制失败');
-      }
-    }
-    
-    // 页面卸载时清理定时器
-    window.addEventListener('beforeunload', () => {
-      if (refreshTimer) {
-        clearInterval(refreshTimer);
-      }
-    });
-  </script>
+// 点击“取码”
+function fetchCodeForEmail(email, btn){
+  if (btn && btn.disabled) return;
+  if (pollingStatus[email] && pollingStatus[email].isActive) return;
+  startPolling(email, btn);
+}
+
+// 开始轮询
+function startPolling(email, btn){
+  // 停掉其他
+  Object.keys(pollingStatus).forEach(e => { if (e!==email) stopPolling(e); });
+
+  pollingStatus[email] = { isActive:true, startTime:Date.now(), endTime:Date.now()+POLLING_DURATION };
+
+  fetchCodeOnce(email, btn);
+  pollingIntervals[email] = setInterval(() => {
+    const left = pollingStatus[email].endTime - Date.now();
+    if (left<=0){ stopPolling(email); return; }
+    fetchCodeOnce(email, btn);
+  }, REFRESH_INTERVAL);
+
+  // 自动停止
+  setTimeout(() => stopPolling(email), POLLING_DURATION);
+
+  updatePollingDisplay(email);
+}
+
+// 停止
+function stopPolling(email){
+  if (pollingIntervals[email]){ clearInterval(pollingIntervals[email]); delete pollingIntervals[email]; }
+  if (pollingStatus[email]) pollingStatus[email].isActive = false;
+  updatePollingDisplay(email);
+}
+
+// 供按钮调用
+function stopPollingForEmail(email){ stopPolling(email); }
+
+// 根据状态更新一行的控件显示
+function updatePollingDisplay(email){
+  const item = document.querySelector(`[data-email="${email}"]`);
+  if (!item) return;
+  const index = item.getAttribute('data-index');
+
+  const isPolling = pollingStatus[email] && pollingStatus[email].isActive;
+  const remaining = isPolling ? Math.max(0, Math.ceil((pollingStatus[email].endTime - Date.now())/1000)) : 0;
+
+  const pollingEl = document.getElementById(`polling-${index}`);
+  const fetchBtn = document.getElementById(`fetch-${index}`);
+  const stopBtn  = document.getElementById(`stop-${index}`);
+
+  if (pollingEl) pollingEl.textContent = isPolling ? `查询中 (${remaining}s)` : '';
+
+  if (fetchBtn){
+    fetchBtn.textContent = isPolling ? '查询中' : '取码';
+    fetchBtn.disabled = !!isPolling;
+    fetchBtn.classList.toggle('polling', !!isPolling);
+  }
+
+  if (stopBtn){
+    stopBtn.style.display = isPolling ? 'inline-block' : 'none';
+  }
+}
+
+// 复制
+function copyToClipboard(text){
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='-9999px';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  }catch(e){ console.error('复制失败', e); }
+}
+</script>
 </body>
 </html>
