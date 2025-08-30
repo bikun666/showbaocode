@@ -359,7 +359,12 @@
       font-size: 13px;
       color: #374151;
       font-weight: 500;
-      min-width: 200px;
+      width: 280px;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: inline-block;
     }
 
     .email-code-display {
@@ -654,6 +659,16 @@
       
       .guide-section li {
         font-size: 13px;
+      }
+      
+      .email-text {
+        width: 200px;
+        max-width: 200px;
+        font-size: 12px;
+      }
+      
+      .email-info {
+        gap: 8px;
       }
     }
   </style>
@@ -1050,7 +1065,7 @@
           <div class="email-item ${isEven ? 'even' : 'odd'}" data-email="${email}" data-index="${index}">
             <div class="email-info">
               <span class="email-no">No.${index + 1}</span>
-              <span class="email-text">${email}</span>
+              <span class="email-text" title="${email}">${email}</span>
               <button class="email-copy-btn" onclick="copyToClipboard('${email}')">邮箱复制</button>
               <span class="email-code-display" id="codeDisplay-${index}"></span>
               <span class="fetch-time" id="fetchTime-${index}"></span>
