@@ -378,19 +378,23 @@
     }
 
     .email-code-display {
-      font-size: 12px;
-      color: #6b7280;
-      font-family: monospace;
-      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 220px;
       flex-shrink: 0;
-      min-width: 120px;
     }
 
-    .email-code-display.has-code {
-      color: #059669;
-      font-weight: 600;
+    .code-value {
       font-size: 14px;
-      white-space: nowrap;
+      font-weight: 600;
+      color: #059669;
+    }
+
+    .time-text {
+      font-size: 12px;
+      color: #6b7280;
+      font-style: italic;
     }
 
     .email-actions {
@@ -504,13 +508,6 @@
       white-space: nowrap;
       flex-shrink: 0;
       min-width: 150px;
-    }
-
-    .time-text {
-      font-size: 11px;
-      color: #6b7280;
-      font-style: italic;
-      white-space: nowrap;
     }
 
     .fetch-btn.polling {
@@ -950,7 +947,17 @@
           }
         } else {
           if (codeDisplayArea) {
-            codeDisplayArea.innerHTML = `<span style="color: #ef4444;">❌ ${data.error}</span>`;
+            // 显示错误信息
+            codeDisplayArea.querySelector('.code-value').textContent = `❌ ${data.error}`;
+            codeDisplayArea.querySelector('.code-value').style.color = '#ef4444';
+            const copyBtn = codeDisplayArea.querySelector('.copy-btn');
+            copyBtn.style.display = 'none';
+            
+            // 清空时间
+            const fetchTimeElement = codeDisplayArea.querySelector(`#fetchTime-${emailIndex}`);
+            if (fetchTimeElement) {
+              fetchTimeElement.textContent = '';
+            }
           }
         }
         emailItem.classList.remove('has-code');
@@ -979,17 +986,18 @@
         } else {
           // 电脑端：更新第一行
           if (codeDisplayArea) {
-            codeDisplayArea.innerHTML = `
-              <span class="email-code-display has-code">
-                ${latestCode.code}
-                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')" ontouchstart="copyToClipboard('${latestCode.code}')">码复制</button>
-              </span>
-            `;
-          }
-          
-          const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
-          if (fetchTimeElement) {
-            fetchTimeElement.innerHTML = `<span class="time-text">来码时间: ${sheetTime}</span>`;
+            // 显示验证码 + 复制按钮
+            codeDisplayArea.querySelector('.code-value').textContent = latestCode.code;
+            const copyBtn = codeDisplayArea.querySelector('.copy-btn');
+            copyBtn.style.display = 'inline-block';
+            copyBtn.onclick = () => copyToClipboard(latestCode.code);
+            copyBtn.ontouchstart = () => copyToClipboard(latestCode.code);
+
+            // 更新时间
+            const fetchTimeElement = codeDisplayArea.querySelector(`#fetchTime-${emailIndex}`);
+            if (fetchTimeElement) {
+              fetchTimeElement.textContent = `来码时间: ${sheetTime}`;
+            }
           }
         }
         
@@ -1003,12 +1011,16 @@
           }
         } else {
           if (codeDisplayArea) {
-            codeDisplayArea.innerHTML = `<span class="email-code-display">暂无验证码</span>`;
-          }
-          
-          const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
-          if (fetchTimeElement) {
-            fetchTimeElement.innerHTML = '';
+            // 隐藏验证码和复制按钮
+            codeDisplayArea.querySelector('.code-value').textContent = '';
+            const copyBtn = codeDisplayArea.querySelector('.copy-btn');
+            copyBtn.style.display = 'none';
+            
+            // 清空时间
+            const fetchTimeElement = codeDisplayArea.querySelector(`#fetchTime-${emailIndex}`);
+            if (fetchTimeElement) {
+              fetchTimeElement.textContent = '';
+            }
           }
         }
         
@@ -1246,22 +1258,25 @@
               <div class="mobile-code-line" id="mobileCodeLine-${index}"></div>
             </div>
           `;
-        } else {
+                } else {
           // 电脑端：一行显示所有内容
           return `
             <div class="email-item ${isEven ? 'even' : 'odd'}" data-email="${email}" data-index="${index}">
               <div class="email-info">
                 <span class="email-no">${index + 1}. ${email}</span>
                 <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
-                <span class="email-code-display" id="codeDisplay-${index}">&nbsp;</span>
-                <span class="fetch-time" id="fetchTime-${index}">&nbsp;</span>
+                <span class="email-code-display" id="codeDisplay-${index}">
+                  <span class="code-value"></span>
+                  <button class="copy-btn" style="display:none">码复制</button>
+                  <span class="time-text" id="fetchTime-${index}"></span>
+                </span>
               </div>
               <div class="email-actions">
                 ${isPolling ? `<span class="polling-status">查询中 (${remainingTime}s)</span>` : ''}
                 ${isPolling ? `
-                                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">
-                  停止
-                </button>
+                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">
+                    停止
+                  </button>
                 ` : ''}
                 <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)" ${isPolling ? 'disabled' : ''}>
                   ${isPolling ? '查询中' : '取码'}
