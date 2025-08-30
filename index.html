@@ -424,6 +424,7 @@
       background: #9ca3af;
       cursor: not-allowed;
       transform: none;
+      opacity: 0.6;
     }
 
     .fetch-btn.loading {
@@ -1238,7 +1239,7 @@
                     停止
                   </button>
                 ` : ''}
-                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)">
+                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)" ${isPolling ? 'disabled' : ''}>
                   ${isPolling ? '查询中' : '取码'}
                 </button>
               </div>
@@ -1262,7 +1263,7 @@
                   停止
                 </button>
                 ` : ''}
-                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)">
+                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)" ${isPolling ? 'disabled' : ''}>
                   ${isPolling ? '查询中' : '取码'}
                 </button>
               </div>
@@ -1281,13 +1282,11 @@
     // 为指定邮箱获取验证码
     function fetchCodeForEmail(email, button) {
       console.log('fetchCodeForEmail 被调用:', email);
-      console.log('当前轮询状态:', pollingStatus);
       if (button && button.disabled) return;
       
-      // 如果已经在查询中，停止查询
+      // 如果已经在查询中，直接忽略，不要停止
       if (pollingStatus[email] && pollingStatus[email].isActive) {
-        console.log('停止查询:', email);
-        stopPolling(email);
+        console.log('已经在查询中:', email);
         return;
       }
       
@@ -1492,6 +1491,7 @@
           if (fetchBtn) {
             fetchBtn.textContent = isPolling ? '查询中' : '取码';
             fetchBtn.className = `fetch-btn ${isPolling ? 'polling' : ''}`;
+            fetchBtn.disabled = isPolling;
           }
           
           // 更新停止按钮
