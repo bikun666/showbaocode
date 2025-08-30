@@ -348,23 +348,21 @@
       }
     });
 
-    // 初始化 - 等待页面完全加载后5秒再开始收集验证码
+    // 初始化 - 页面完全加载后直接开始收集验证码
     function initializeCodeCollection() {
-      console.log('页面已完全加载，等待5秒后开始收集验证码...');
+      console.log('页面已完全加载，开始收集验证码...');
       
       // 更新加载提示
       const loadingText = document.querySelector('.loading-text');
       if (loadingText) {
-        loadingText.textContent = '页面已加载完成，等待5秒后开始收集验证码...';
+        loadingText.textContent = '页面已加载完成，正在收集验证码...';
       }
       
-      setTimeout(() => {
-        console.log('开始收集验证码');
-        fetchCode();
-        
-        // 设置定时刷新
-        refreshTimer = setInterval(fetchCode, REFRESH_INTERVAL);
-      }, 5000); // 等待5秒
+      console.log('开始收集验证码');
+      fetchCode();
+      
+      // 设置定时刷新
+      refreshTimer = setInterval(fetchCode, REFRESH_INTERVAL);
     }
 
     // 页面完全加载后开始初始化
