@@ -579,7 +579,7 @@
       const timeout = setTimeout(() => {
         window[callbackName] = null;
         document.head.removeChild(script);
-        renderCodeDisplay({ error: '请求超时，请检查网络连接' });
+        console.log('全局请求超时');
       }, 10000); // 10秒超时
       
       // 定义回调函数
@@ -588,22 +588,19 @@
         window[callbackName] = null;
         document.head.removeChild(script);
         
-        console.log('JSONP回调收到数据:', data);
+        console.log('全局JSONP回调收到数据:', data);
         
         try {
           if (data.status === 'OK' && data.data) {
-            console.log('验证码数据:', data.data);
-            renderCodeDisplay(data.data);
+            console.log('全局验证码数据:', data.data);
+            // 全局获取不显示到特定邮箱，只记录日志
           } else if (data.status === 'ERROR') {
-            console.log('服务错误:', data.message);
-            renderCodeDisplay({ error: data.message || '服务错误' });
+            console.log('全局服务错误:', data.message);
           } else {
-            console.log('未知响应格式:', data);
-            renderCodeDisplay({ error: '未知错误' });
+            console.log('全局未知响应格式:', data);
           }
         } catch (error) {
-          console.error('解析响应失败:', error);
-          renderCodeDisplay({ error: '响应解析失败' });
+          console.error('全局解析响应失败:', error);
         }
       };
       
@@ -612,8 +609,7 @@
         clearTimeout(timeout);
         window[callbackName] = null;
         document.head.removeChild(script);
-        console.error('JSONP请求失败，API地址:', API_URL);
-        renderCodeDisplay({ error: '网络请求失败，请检查API地址是否正确' });
+        console.error('全局JSONP请求失败，API地址:', API_URL);
       };
       
       // 添加到页面
@@ -622,13 +618,15 @@
 
     // 手动刷新
     document.getElementById('refreshBtn').addEventListener('click', () => {
-      fetchCode();
+      console.log('手动刷新邮箱列表');
+      fetchEmailList();
     });
 
     // 页面可见性变化时刷新
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        fetchCode();
+        console.log('页面变为可见，刷新邮箱列表');
+        fetchEmailList();
       }
     });
 
