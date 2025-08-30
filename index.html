@@ -231,6 +231,7 @@
     .code-item-header {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 8px;
     }
 
@@ -238,6 +239,15 @@
       font-size: 14px;
       color: #3b82f6;
       font-weight: 600;
+    }
+
+    .code-index {
+      font-size: 12px;
+      color: #9ca3af;
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: auto;
     }
 
     .code-item-body {
@@ -319,7 +329,7 @@
 
   <script>
     // 配置
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxbsfB20RHPC9LuozqngE1c6GhatVGH7vn0PHdRQvG8apFn9CBBaerLqix8fenISXklFA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzbMDrwsnjeMLnvJ2KlAIUtsFVoxBDIkydsATUZFS1gv_3DfmytW5v_T4QgnhI3Ps1sJA/exec';
     const REFRESH_INTERVAL = 3000; // 3秒刷新一次
     let lastCode = null;
     let refreshTimer = null;
@@ -358,53 +368,61 @@
         return;
       }
 
-      const hasNewCode = data.code && data.code !== lastCode;
-      lastCode = data.code;
+      // 检查是否有新的验证码
+      const hasNewCode = data.codes && data.codes.length > 0 && data.codes[0].code !== lastCode;
+      if (hasNewCode) {
+        lastCode = data.codes[0].code;
+      }
 
-      // 模拟多个验证码条目（实际应该从GAS获取历史数据）
-      const mockCodes = [
-        { email: data.email, code: data.code, time: new Date(), isNew: true },
-        { email: data.email, code: '088489', time: new Date(Date.now() - 10000), isNew: false },
-        { email: 'myubu763@instaddr.ch', code: '772597', time: new Date(Date.now() - 20000), isNew: false },
-        { email: 'myubu***@instaddr.ch', code: '031831', time: new Date(Date.now() - 30000), isNew: false, hidden: true },
-        { email: 'gibyo***@quicksend.ch', code: '209567', time: new Date(Date.now() - 40000), isNew: false, hidden: true },
-        { email: 'fewak***@hamham.uk', code: '332693', time: new Date(Date.now() - 50000), isNew: false, hidden: true },
-        { email: 'sopy***@boxfi.uk', code: '315395', time: new Date(Date.now() - 60000), isNew: false, hidden: true },
-        { email: 'bikun***@usagica.com', code: '930863', time: new Date(Date.now() - 70000), isNew: false, hidden: true }
-      ];
+      // 如果有验证码数据，显示验证码列表
+      if (data.codes && data.codes.length > 0) {
+        const codeListHTML = data.codes.map((item, index) => {
+          const isNew = index === 0 && hasNewCode;
+          
+          return `
+            <div class="code-item ${isNew ? 'highlight' : ''}">
+              <div class="code-item-content">
+                <div class="code-item-header">
+                  <span class="email-address">${item.email}</span>
+                  <span class="code-index">#${index + 1}</span>
+                </div>
+                <div class="code-item-body">
+                  <span class="code-label">验证码:</span>
+                  <span class="code-value">${item.code}</span>
+                  <button class="copy-btn" onclick="copyToClipboard('${item.code}')">复制</button>
+                </div>
+                <div class="code-item-footer">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span class="time-stamp">${formatTime(new Date(item.time))}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
 
-      const codeListHTML = mockCodes.map((item, index) => {
-        const emailDisplay = item.hidden ? item.email : item.email;
-        const hiddenNotice = item.hidden ? '<span style="color: #f59e0b; font-size: 12px; margin-left: 8px;">💡 为保护隐私,邮箱已部分隐藏</span>' : '';
-        
-        return `
-          <div class="code-item ${item.isNew ? 'highlight' : ''}">
-            <div class="code-item-content">
-              <div class="code-item-header">
-                <span class="email-address">${emailDisplay}</span>
-                ${hiddenNotice}
-              </div>
-              <div class="code-item-body">
-                <span class="code-label">验证码:</span>
-                <span class="code-value">${item.code}</span>
-                <button class="copy-btn" onclick="copyToClipboard('${item.code}')">复制</button>
-              </div>
-              <div class="code-item-footer">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                </svg>
-                <span class="time-stamp">${formatTime(item.time)}</span>
-              </div>
+        content.innerHTML = `
+          <div class="code-list">
+            ${codeListHTML}
+          </div>
+        `;
+      } else {
+        // 没有验证码时显示提示
+        content.innerHTML = `
+          <div class="code-display">
+            <div class="code-label">暂无验证码</div>
+            <div class="code-value">等待中...</div>
+            <div class="email-info">请稍候，系统正在获取验证码</div>
+            <div class="status-info">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              更新时间: ${formatTime(new Date())}
             </div>
           </div>
         `;
-      }).join('');
-
-      content.innerHTML = `
-        <div class="code-list">
-          ${codeListHTML}
-        </div>
-      `;
+      }
 
       if (hasNewCode) {
         flashHeader();
