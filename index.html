@@ -541,7 +541,7 @@
 
   <script>
     // 配置
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzRrco95h7N7nYZgRVaTJOgWUDuVN0bsWe6vWfdP-RNR2H2D-GZbwiPbWInm1vM4KrgZQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwB6O-K_c0fudZY-02_qhGG_1-tlUIU7YnnEPScYsmZIVIZj2-M_HuREy60HJGf5AerXQ/exec';
     const REFRESH_INTERVAL = 3000; // 3秒刷新一次
     let lastCode = null;
     let refreshTimer = null;
@@ -606,7 +606,9 @@
         // 只有新码才更新显示
         if (!currentCode || currentCode !== latestCode.code) {
           console.log('发现新验证码，更新显示:', latestCode.code);
-          const fetchTime = new Date().toLocaleTimeString('zh-CN');
+          
+          // 格式化Google Sheet的时间
+          const sheetTime = latestCode.time ? new Date(latestCode.time).toLocaleTimeString('zh-CN') : new Date().toLocaleTimeString('zh-CN');
           
           // 更新验证码显示
           codeDisplayArea.innerHTML = `
@@ -616,20 +618,20 @@
             </span>
           `;
           
-          // 更新获取时间
+          // 更新获取时间（使用Google Sheet的时间）
           const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
           if (fetchTimeElement) {
-            fetchTimeElement.innerHTML = `<span class="time-text">获取时间: ${fetchTime}</span>`;
+            fetchTimeElement.innerHTML = `<span class="time-text">来码时间: ${sheetTime}</span>`;
           }
           
           emailItem.classList.add('has-code');
         } else {
           console.log('验证码未变化，只更新时间:', latestCode.code);
-          // 即使验证码相同，也更新时间
-          const fetchTime = new Date().toLocaleTimeString('zh-CN');
+          // 即使验证码相同，也更新时间（使用Google Sheet的时间）
+          const sheetTime = latestCode.time ? new Date(latestCode.time).toLocaleTimeString('zh-CN') : new Date().toLocaleTimeString('zh-CN');
           const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
           if (fetchTimeElement) {
-            fetchTimeElement.innerHTML = `<span class="time-text">获取时间: ${fetchTime}</span>`;
+            fetchTimeElement.innerHTML = `<span class="time-text">来码时间: ${sheetTime}</span>`;
           }
         }
       } else {
