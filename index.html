@@ -19,7 +19,7 @@
     .refresh-btn:hover{background:#2563eb;transform:translateY(-2px);box-shadow:0 6px 8px rgba(59,130,246,.4)}
     .notice{font-size:14px;color:#ef4444;padding:10px 16px;background:#fff1f0;border-radius:8px;margin-top:0}
 
-    /* 列表 */
+    /* 列表 - 优化布局 */
     .email-list{display:flex;flex-direction:column;gap:4px;margin-bottom:20px}
     .email-item{background:#fff;border-radius:6px;padding:8px 12px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:space-between;transition:all .2s;border-left:3px solid transparent}
     .email-item.even{background:#fafafa}
@@ -28,15 +28,15 @@
     .email-item.has-code.even{background:#f0fdf4}
 
     .email-info{display:flex;align-items:center;gap:8px;flex:1;flex-wrap:nowrap;overflow:hidden;width:100%}
-    .email-no{font-size:13px;color:#374151;font-weight:500;min-width:200px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+    .email-no{font-size:13px;color:#374151;font-weight:500;min-width:180px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
     .email-copy-btn{background:#8b5cf6;color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;min-width:60px}
     .email-copy-btn:hover{background:#7c3aed;transform:translateY(-1px)}
 
-    .email-code-display{display:flex;align-items:center;gap:8px;min-width:220px;flex-shrink:0}
-    .code-value{font-size:14px;font-weight:600;color:#059669}
+    .email-code-display{display:flex;align-items:center;gap:8px;min-width:0;flex:1;justify-content:flex-end}
+    .code-value{font-size:14px;font-weight:600;color:#059669;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
     .copy-btn{background:#10b981;color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
     .copy-btn:hover{background:#059669;transform:translateY(-1px)}
-    .time-text{font-size:12px;color:#6b7280;font-style:italic}
+    .time-text{font-size:12px;color:#6b7280;font-style:italic;white-space:nowrap;flex-shrink:0}
 
     .polling-status{font-size:11px;color:#f59e0b;font-weight:600;white-space:nowrap;flex-shrink:0;min-width:80px}
     .stop-btn{background:#ef4444;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;min-width:50px}
@@ -49,7 +49,7 @@
     .mobile-code-line{display:none}
     @keyframes pulse{0%{opacity:1}50%{opacity:.7}100%{opacity:1}}
 
-    /* 使用说明 & 其它样式保持不变（略去无关项以便阅读） */
+    /* 使用说明 */
     .loading{background:#fff;border-left:6px solid #3b82f6;padding:20px 30px;margin-bottom:16px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.08);text-align:center}
     .loading-text{font-size:18px;color:#6b7280;animation:pulse 1.5s infinite}
     .usage-guide{background:#fff;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.08);margin-top:20px;overflow:hidden;border:1px solid #e5e7eb}
@@ -62,6 +62,12 @@
     .guide-section ul{list-style:none;padding:0;margin:0}
     .guide-section li{padding:8px 0;color:#6b7280;font-size:14px;line-height:1.5;position:relative;padding-left:20px}
     .guide-section li:before{content:"•";color:#3b82f6;font-weight:bold;position:absolute;left:0;top:8px}
+
+    /* 适配中等屏幕 */
+    @media (max-width: 900px) {
+      .email-no { min-width: 150px; max-width: 150px; }
+      .time-text { display: none; }
+    }
 
     /* 手机端 */
     @media (max-width:768px){
@@ -98,7 +104,7 @@
       </div>
     </div>
 
-    <!-- 使用说明（原样保留） -->
+    <!-- 使用说明 -->
     <div class="usage-guide">
       <div class="guide-header"><h2>📖 使用说明</h2></div>
       <div class="guide-content">
@@ -117,6 +123,7 @@
             <li><strong>查询时长</strong>：每个邮箱查询5分钟，自动停止</li>
             <li><strong>验证码更新</strong>：只有发现新验证码才会更新显示，避免重复</li>
             <li><strong>时间显示</strong>：显示验证码的实际获取时间</li>
+            <li><strong>持久化显示</strong>：已查询到的验证码会一直显示，不会消失</li>
           </ul>
         </div>
         <div class="guide-section">
@@ -142,6 +149,9 @@ let pollingIntervals = {};
 let pollingStatus = {};
 const POLLING_DURATION = 5 * 60 * 1000;
 
+// 存储已获取的验证码
+let fetchedCodes = {};
+
 // 初始化
 if (document.readyState === 'complete') { initializeCodeCollection(); }
 else { window.addEventListener('load', initializeCodeCollection); }
@@ -149,6 +159,12 @@ else { window.addEventListener('load', initializeCodeCollection); }
 document.getElementById('refreshBtn').addEventListener('click', fetchEmailList);
 
 function initializeCodeCollection(){
+  // 从本地存储加载已获取的验证码
+  const savedCodes = localStorage.getItem('fetchedCodes');
+  if (savedCodes) {
+    fetchedCodes = JSON.parse(savedCodes);
+  }
+  
   fetchEmailList();
   // 每秒刷新倒计时文本
   setInterval(() => {
@@ -194,11 +210,13 @@ function renderEmailList(emails){
 
   const html = emails.map((email, index) => {
     const isEven = index % 2 === 0;
+    const hasCode = fetchedCodes[email] && fetchedCodes[email].code;
+    const codeClass = hasCode ? 'has-code' : '';
 
     if (isMobile){
       // 手机端：按钮单独一行，验证码/时间在第二行
       return `
-      <div class="email-item ${isEven ? 'even':'odd'}" data-email="${email}" data-index="${index}">
+      <div class="email-item ${isEven ? 'even':'odd'} ${codeClass}" data-email="${email}" data-index="${index}">
         <div class="email-info">
           <span class="email-no">${index+1}. ${email}</span>
           <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
@@ -210,21 +228,31 @@ function renderEmailList(emails){
           <button class="fetch-btn" id="fetch-${index}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)">取码</button>
         </div>
 
-        <div class="mobile-code-line" id="mobileCodeLine-${index}"></div>
+        <div class="mobile-code-line" id="mobileCodeLine-${index}">
+          ${hasCode ? `
+            <div class="mobile-code-display">
+              ${fetchedCodes[email].code}
+              <button class="copy-btn" onclick="copyToClipboard('${fetchedCodes[email].code}')" ontouchstart="copyToClipboard('${fetchedCodes[email].code}')">码复制</button>
+            </div>
+            <div class="mobile-time-display">来码时间: ${fetchedCodes[email].time}</div>
+          ` : ''}
+        </div>
       </div>`;
     }
 
     // 桌面端：一行包括邮箱/复制/验证码/时间/状态/停止/取码
     return `
-    <div class="email-item ${isEven ? 'even':'odd'}" data-email="${email}" data-index="${index}">
+    <div class="email-item ${isEven ? 'even':'odd'} ${codeClass}" data-email="${email}" data-index="${index}">
       <div class="email-info">
         <span class="email-no">${index+1}. ${email}</span>
         <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
 
         <span class="email-code-display" id="codeDisplay-${index}">
-          <span class="code-value"></span>
-          <button class="copy-btn" id="copyCodeBtn-${index}" style="display:none">码复制</button>
-          <span class="time-text" id="fetchTime-${index}"></span>
+          ${hasCode ? `
+            <span class="code-value">${fetchedCodes[email].code}</span>
+            <button class="copy-btn" id="copyCodeBtn-${index}" onclick="copyToClipboard('${fetchedCodes[email].code}')" ontouchstart="copyToClipboard('${fetchedCodes[email].code}')">码复制</button>
+            <span class="time-text" id="fetchTime-${index}">来码时间: ${fetchedCodes[email].time}</span>
+          ` : ''}
         </span>
 
         <span class="polling-status" id="polling-${index}"></span>
@@ -299,6 +327,13 @@ function renderCodeDisplay(data, targetEmail){
     const latest = data.codes[0];
     const sheetTime = latest.time ? new Date(latest.time).toLocaleTimeString('zh-CN') : new Date().toLocaleTimeString('zh-CN');
 
+    // 保存到本地存储
+    fetchedCodes[targetEmail] = {
+      code: latest.code,
+      time: sheetTime
+    };
+    localStorage.setItem('fetchedCodes', JSON.stringify(fetchedCodes));
+
     if (isMobile){
       const line = document.getElementById(`mobileCodeLine-${index}`);
       if (line){
@@ -312,39 +347,32 @@ function renderCodeDisplay(data, targetEmail){
     }else{
       const codeBox = document.getElementById(`codeDisplay-${index}`);
       if (codeBox){
-        codeBox.querySelector('.code-value').style.color = '#059669';
-        codeBox.querySelector('.code-value').textContent = latest.code;
-        const copyBtn = document.getElementById(`copyCodeBtn-${index}`);
-        if (copyBtn){
-          copyBtn.style.display = 'inline-block';
-          copyBtn.onclick = () => copyToClipboard(latest.code);
-          copyBtn.ontouchstart = () => copyToClipboard(latest.code);
-        }
-        const timeEl = document.getElementById(`fetchTime-${index}`);
-        if (timeEl) timeEl.textContent = `来码时间: ${sheetTime}`;
+        codeBox.innerHTML = `
+          <span class="code-value">${latest.code}</span>
+          <button class="copy-btn" id="copyCodeBtn-${index}" onclick="copyToClipboard('${latest.code}')" ontouchstart="copyToClipboard('${latest.code}')">码复制</button>
+          <span class="time-text" id="fetchTime-${index}">来码时间: ${sheetTime}</span>
+        `;
       }
     }
     emailItem.classList.add('has-code');
   }else{
-    // 清空
-    if (isMobile){
-      const line = document.getElementById(`mobileCodeLine-${index}`);
-      if (line) line.innerHTML = '';
-    }else{
-      const codeBox = document.getElementById(`codeDisplay-${index}`);
-      if (codeBox){
-        codeBox.querySelector('.code-value').textContent = '';
-        const copyBtn = document.getElementById(`copyCodeBtn-${index}`);
-        if (copyBtn) copyBtn.style.display = 'none';
-        const timeEl = document.getElementById(`fetchTime-${index}`);
-        if (timeEl) timeEl.textContent = '';
+    // 没有新验证码，但保留已存在的验证码
+    if (!fetchedCodes[targetEmail]) {
+      if (isMobile){
+        const line = document.getElementById(`mobileCodeLine-${index}`);
+        if (line) line.innerHTML = '';
+      }else{
+        const codeBox = document.getElementById(`codeDisplay-${index}`);
+        if (codeBox){
+          codeBox.innerHTML = '';
+        }
       }
+      emailItem.classList.remove('has-code');
     }
-    emailItem.classList.remove('has-code');
   }
 }
 
-// 点击“取码”
+// 点击"取码"
 function fetchCodeForEmail(email, btn){
   if (btn && btn.disabled) return;
   if (pollingStatus[email] && pollingStatus[email].isActive) return;
@@ -414,6 +442,25 @@ function copyToClipboard(text){
     ta.value = text; ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='-9999px';
     document.body.appendChild(ta); ta.focus(); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
+    
+    // 显示复制成功提示
+    const notification = document.createElement('div');
+    notification.textContent = '已复制: ' + text;
+    notification.style.position = 'fixed';
+    notification.style.bottom = '20px';
+    notification.style.right = '20px';
+    notification.style.backgroundColor = '#10b981';
+    notification.style.color = 'white';
+    notification.style.padding = '10px 15px';
+    notification.style.borderRadius = '5px';
+    notification.style.zIndex = '1000';
+    notification.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+    document.body.appendChild(notification);
+    
+    // 2秒后移除提示
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 2000);
   }catch(e){ console.error('复制失败', e); }
 }
 </script>
