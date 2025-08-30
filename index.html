@@ -343,32 +343,32 @@
     .email-info {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       flex: 1;
       flex-wrap: nowrap;
       overflow: hidden;
     }
 
     .email-no {
-      font-size: 12px;
-      color: #6b7280;
-      font-weight: 600;
-      min-width: 30px;
-      margin-right: 8px;
-    }
-
-    .email-no::after {
-      content: "　"; /* 全角空格 */
-      margin-left: 4px;
+      font-size: 13px;
+      color: #374151;
+      font-weight: 500;
+      min-width: 280px;
+      margin-right: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: inline-block;
+      flex-shrink: 0;
     }
 
     .email-text {
       font-size: 13px;
       color: #374151;
       font-weight: 500;
-      width: 280px;
-      max-width: 280px;
-      min-width: 280px;
+      width: 250px;
+      max-width: 250px;
+      min-width: 250px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -719,13 +719,8 @@
       }
       
       .email-no {
-        min-width: 25px;
-        font-size: 11px;
-      }
-      
-      .email-text {
-        width: 180px;
-        max-width: 180px;
+        min-width: 200px;
+        max-width: 200px;
         font-size: 11px;
       }
       
@@ -774,13 +769,21 @@
     .mobile-code-line {
       display: none !important;
     }
+    
+    /* 桌面端显示原有元素 */
+    .email-code-display {
+      display: inline-block !important;
+    }
+    
+    .fetch-time {
+      display: inline-block !important;
+    }
       
       .email-copy-btn, .copy-btn, .fetch-btn, .stop-btn {
         font-size: 10px;
         padding: 3px 6px;
         min-height: 24px;
         min-width: 44px;
-        touch-action: manipulation;
       }
       
       .polling-status {
@@ -797,8 +800,8 @@
     }
     
     @media (max-width: 480px) {
-      .email-text {
-        width: 150px;
+      .email-no {
+        min-width: 150px;
         max-width: 150px;
         font-size: 10px;
       }
@@ -813,7 +816,6 @@
         padding: 2px 4px;
         min-height: 24px;
         min-width: 44px;
-        touch-action: manipulation;
       }
     }
   </style>
@@ -878,7 +880,7 @@
             <li><strong>复制反馈</strong>：复制成功会显示"已复制"，1秒后恢复</li>
           </ul>
         </div>
-              </div>
+      </div>
     </div>
   </div>
 
@@ -957,7 +959,7 @@
           codeDisplayArea.innerHTML = `
             <span class="email-code-display has-code">
               ${latestCode.code}
-              <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')" ontouchstart="copyToClipboard('${latestCode.code}')">码复制</button>
+              <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">码复制</button>
             </span>
           `;
           
@@ -973,8 +975,8 @@
             mobileCodeLine.innerHTML = `
               <div class="mobile-code-display">
                 ${latestCode.code}
-                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')" ontouchstart="copyToClipboard('${latestCode.code}')">码复制</button>
-              </div>
+                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">码复制</button>
+          </div>
               <div class="mobile-time-display">来码时间: ${sheetTime}</div>
             `;
           }
@@ -1052,15 +1054,15 @@
         console.log('全局JSONP回调收到数据:', data);
         
         try {
-          if (data.status === 'OK' && data.data) {
+        if (data.status === 'OK' && data.data) {
             console.log('全局验证码数据:', data.data);
             // 全局获取不显示到特定邮箱，只记录日志
-          } else if (data.status === 'ERROR') {
+        } else if (data.status === 'ERROR') {
             console.log('全局服务错误:', data.message);
-          } else {
+        } else {
             console.log('全局未知响应格式:', data);
-          }
-        } catch (error) {
+        }
+      } catch (error) {
           console.error('全局解析响应失败:', error);
         }
       };
@@ -1236,20 +1238,19 @@
         return `
           <div class="email-item ${isEven ? 'even' : 'odd'}" data-email="${email}" data-index="${index}">
             <div class="email-info">
-              <span class="email-no">${index + 1}.</span>
-              <span class="email-text" title="${email}">${email}</span>
-              <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
+              <span class="email-no">${index + 1}. ${email}</span>
+              <button class="email-copy-btn" onclick="copyToClipboard('${email}')">邮箱复制</button>
               <span class="email-code-display" id="codeDisplay-${index}"></span>
               <span class="fetch-time" id="fetchTime-${index}"></span>
             </div>
             <div class="email-actions">
               ${isPolling ? `<span class="polling-status">查询中 (${remainingTime}s)</span>` : ''}
               ${isPolling ? `
-                <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">
+                <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)">
                   停止
                 </button>
               ` : ''}
-              <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)">
+              <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)">
                 ${isPolling ? '查询中' : '取码'}
               </button>
             </div>
@@ -1272,11 +1273,13 @@
       
       // 如果已经在查询中，停止查询
       if (pollingStatus[email] && pollingStatus[email].isActive) {
+        console.log('停止查询:', email);
         stopPolling(email);
         return;
       }
       
       // 开始查询
+      console.log('开始查询:', email);
       startPolling(email, button);
     }
 
@@ -1435,7 +1438,7 @@
     // 更新查询显示
     function updatePollingDisplay(email) {
       // 只更新特定邮箱的查询状态，不重新渲染整个列表
-      const emailIndex = emailList.findIndex(email => email === email);
+      const emailIndex = emailList.findIndex(e => e === email);
       if (emailIndex !== -1) {
         const emailItem = document.querySelector(`[data-email="${email}"]`);
         if (emailItem) {
@@ -1556,7 +1559,7 @@
         showOperationTip(text, '复制失败');
       }
     }
-
+    
     // 页面卸载时清理定时器
     window.addEventListener('beforeunload', () => {
       if (refreshTimer) {
