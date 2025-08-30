@@ -353,7 +353,8 @@
       font-size: 13px;
       color: #374151;
       font-weight: 500;
-      min-width: 280px;
+      min-width: 250px;
+      max-width: 250px;
       margin-right: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -382,6 +383,7 @@
       font-family: monospace;
       white-space: nowrap;
       flex-shrink: 0;
+      min-width: 120px;
     }
 
     .email-code-display.has-code {
@@ -500,6 +502,7 @@
       margin-left: 12px;
       white-space: nowrap;
       flex-shrink: 0;
+      min-width: 150px;
     }
 
     .time-text {
@@ -967,7 +970,7 @@
             mobileCodeLine.innerHTML = `
               <div class="mobile-code-display">
                 ${latestCode.code}
-                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">码复制</button>
+                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')" ontouchstart="copyToClipboard('${latestCode.code}')">码复制</button>
               </div>
               <div class="mobile-time-display">来码时间: ${sheetTime}</div>
             `;
@@ -978,7 +981,7 @@
             codeDisplayArea.innerHTML = `
               <span class="email-code-display has-code">
                 ${latestCode.code}
-                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">码复制</button>
+                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')" ontouchstart="copyToClipboard('${latestCode.code}')">码复制</button>
               </span>
             `;
           }
@@ -1226,16 +1229,16 @@
             <div class="email-item ${isEven ? 'even' : 'odd'}" data-email="${email}" data-index="${index}">
               <div class="email-info">
                 <span class="email-no">${index + 1}. ${email}</span>
-                <button class="email-copy-btn" onclick="copyToClipboard('${email}')">邮箱复制</button>
+                <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
               </div>
               <div class="email-actions">
                 ${isPolling ? `<span class="polling-status">查询中 (${remainingTime}s)</span>` : ''}
                 ${isPolling ? `
-                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)">
+                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">
                     停止
                   </button>
                 ` : ''}
-                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)">
+                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)">
                   ${isPolling ? '查询中' : '取码'}
                 </button>
               </div>
@@ -1248,18 +1251,18 @@
             <div class="email-item ${isEven ? 'even' : 'odd'}" data-email="${email}" data-index="${index}">
               <div class="email-info">
                 <span class="email-no">${index + 1}. ${email}</span>
-                <button class="email-copy-btn" onclick="copyToClipboard('${email}')">邮箱复制</button>
-                <span class="email-code-display" id="codeDisplay-${index}"></span>
-                <span class="fetch-time" id="fetchTime-${index}"></span>
+                <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
+                <span class="email-code-display" id="codeDisplay-${index}">&nbsp;</span>
+                <span class="fetch-time" id="fetchTime-${index}">&nbsp;</span>
               </div>
               <div class="email-actions">
                 ${isPolling ? `<span class="polling-status">查询中 (${remainingTime}s)</span>` : ''}
                 ${isPolling ? `
-                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)">
-                    停止
-                  </button>
+                                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">
+                  停止
+                </button>
                 ` : ''}
-                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)">
+                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)">
                   ${isPolling ? '查询中' : '取码'}
                 </button>
               </div>
