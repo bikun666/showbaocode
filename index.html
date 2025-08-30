@@ -227,7 +227,7 @@
 
   <script>
     // 配置
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwQCJa0Wnh7FwCGBBuEJzUuRP4EccM4Te87rMCiRoa3wh72SHVajRU-ZeqZB0LukxCf4w/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbziYy0L1pyG-m4G9j6ssmqqLDqIrI7KfDPCJXn-KCuiE7olYspIyjkPuPqVXD8hSjwSCg/exec';
     const REFRESH_INTERVAL = 5000; // 5秒刷新一次
     let lastCode = null;
     let refreshTimer = null;
@@ -288,41 +288,52 @@
       }
     }
 
-    // 获取验证码数据
-    async function fetchCode() {
-      try {
-        const response = await fetch(API_URL, { 
-          method: 'GET',
-          mode: 'cors',
-          cache: 'no-cache',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json'
+    // 获取验证码数据 - 使用JSONP方式避免CORS问题
+    function fetchCode() {
+      // 创建唯一的回调函数名
+      const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
+      // 创建script标签
+      const script = document.createElement('script');
+      script.src = API_URL + '?callback=' + callbackName;
+      
+      // 设置超时
+      const timeout = setTimeout(() => {
+        window[callbackName] = null;
+        document.head.removeChild(script);
+        renderCodeDisplay({ error: '请求超时，请检查网络连接' });
+      }, 10000); // 10秒超时
+      
+      // 定义回调函数
+      window[callbackName] = function(data) {
+        clearTimeout(timeout);
+        window[callbackName] = null;
+        document.head.removeChild(script);
+        
+        try {
+          if (data.status === 'OK' && data.data) {
+            renderCodeDisplay(data.data);
+          } else if (data.status === 'ERROR') {
+            renderCodeDisplay({ error: data.message || '服务错误' });
+          } else {
+            renderCodeDisplay({ error: '未知错误' });
           }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        } catch (error) {
+          console.error('解析响应失败:', error);
+          renderCodeDisplay({ error: '响应解析失败' });
         }
-        
-        const data = await response.json();
-        
-        if (data.status === 'OK' && data.data) {
-          renderCodeDisplay(data.data);
-        } else if (data.status === 'ERROR') {
-          renderCodeDisplay({ error: data.message || '服务错误' });
-        } else {
-          renderCodeDisplay({ error: '未知错误' });
-        }
-        
-      } catch (error) {
-        console.error('获取验证码失败:', error);
-        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-          renderCodeDisplay({ error: 'CORS错误：请检查Google Apps Script的CORS设置或联系管理员' });
-        } else {
-          renderCodeDisplay({ error: `请求失败: ${error.message}` });
-        }
-      }
+      };
+      
+      // 处理加载错误
+      script.onerror = function() {
+        clearTimeout(timeout);
+        window[callbackName] = null;
+        document.head.removeChild(script);
+        renderCodeDisplay({ error: '网络请求失败，请检查API地址是否正确' });
+      };
+      
+      // 添加到页面
+      document.head.appendChild(script);
     }
 
     // 手动刷新
