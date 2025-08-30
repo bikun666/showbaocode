@@ -1281,6 +1281,7 @@
     // 为指定邮箱获取验证码
     function fetchCodeForEmail(email, button) {
       console.log('fetchCodeForEmail 被调用:', email);
+      console.log('当前轮询状态:', pollingStatus);
       if (button && button.disabled) return;
       
       // 如果已经在查询中，停止查询
@@ -1314,25 +1315,34 @@
         endTime: Date.now() + POLLING_DURATION
       };
       
+      console.log('轮询状态已设置:', pollingStatus[email]);
+      
       // 立即执行一次获取
       fetchCodeOnce(email, button);
       
       // 设置定时器，每3秒查询一次
       pollingIntervals[email] = setInterval(() => {
+        console.log('定时器触发，检查剩余时间:', email);
         const remainingTime = pollingStatus[email].endTime - Date.now();
+        console.log('剩余时间:', remainingTime, 'ms');
         
         if (remainingTime <= 0) {
           // 查询时间结束
+          console.log('查询时间结束，停止轮询:', email);
           stopPolling(email);
           return;
         }
         
         // 继续查询
+        console.log('继续查询:', email);
         fetchCodeOnce(email, button);
       }, REFRESH_INTERVAL);
       
+      console.log('定时器已设置，ID:', pollingIntervals[email], '间隔:', REFRESH_INTERVAL, 'ms');
+      
       // 设置查询结束定时器
       setTimeout(() => {
+        console.log('查询结束定时器触发:', email);
         stopPolling(email);
       }, POLLING_DURATION);
       
@@ -1356,6 +1366,7 @@
       // 清除查询状态
       if (pollingStatus[email]) {
         pollingStatus[email].isActive = false;
+        console.log('查询状态已清除:', email, pollingStatus[email]);
       }
       
       // 更新UI显示
@@ -1379,11 +1390,23 @@
       const emailIndex = emailList.findIndex(e => e === email);
       let currentCode = null;
       if (emailIndex !== -1) {
-        const codeDisplayArea = document.getElementById(`codeDisplay-${emailIndex}`);
-        if (codeDisplayArea) {
-          const currentCodeElement = codeDisplayArea.querySelector('.email-code-display.has-code');
-          if (currentCodeElement) {
-            currentCode = currentCodeElement.textContent.trim().split(' ')[0];
+        if (isMobile) {
+          // 手机端：从mobile-code-line获取
+          const mobileCodeLine = document.getElementById(`mobileCodeLine-${emailIndex}`);
+          if (mobileCodeLine) {
+            const codeElement = mobileCodeLine.querySelector('.mobile-code-display');
+            if (codeElement) {
+              currentCode = codeElement.textContent.trim().split(' ')[0];
+            }
+          }
+        } else {
+          // 电脑端：从email-code-display获取
+          const codeDisplayArea = document.getElementById(`codeDisplay-${emailIndex}`);
+          if (codeDisplayArea) {
+            const currentCodeElement = codeDisplayArea.querySelector('.email-code-display.has-code');
+            if (currentCodeElement) {
+              currentCode = currentCodeElement.textContent.trim().split(' ')[0];
+            }
           }
         }
       }
@@ -1428,6 +1451,7 @@
         }
         
         console.log('查询回调收到数据:', data);
+        console.log('当前轮询状态:', pollingStatus[email]);
         
         try {
           if (data.status === 'OK' && data.data) {
@@ -1479,6 +1503,7 @@
               newStopBtn.className = 'stop-btn';
               newStopBtn.textContent = '停止';
               newStopBtn.onclick = () => stopPollingForEmail(email, newStopBtn);
+              newStopBtn.ontouchstart = () => stopPollingForEmail(email, newStopBtn);
               actionsDiv.insertBefore(newStopBtn, actionsDiv.firstChild);
             }
           } else {
