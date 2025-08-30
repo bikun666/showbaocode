@@ -737,11 +737,16 @@
       }
       
       .email-code-display {
-        display: none;
+        display: none !important;
       }
       
       .fetch-time {
-        display: none;
+        display: none !important;
+      }
+      
+      /* 手机端显示第二行 */
+      .mobile-code-line {
+        display: flex !important;
       }
       
       /* 手机端第二行显示验证码和时间 */
@@ -767,12 +772,15 @@
     
     /* 桌面端隐藏手机端元素 */
     .mobile-code-line {
-      display: none;
+      display: none !important;
     }
       
       .email-copy-btn, .copy-btn, .fetch-btn, .stop-btn {
         font-size: 10px;
         padding: 3px 6px;
+        min-height: 24px;
+        min-width: 44px;
+        touch-action: manipulation;
       }
       
       .polling-status {
@@ -803,6 +811,9 @@
       .email-copy-btn, .copy-btn, .fetch-btn, .stop-btn {
         font-size: 9px;
         padding: 2px 4px;
+        min-height: 24px;
+        min-width: 44px;
+        touch-action: manipulation;
       }
     }
   </style>
@@ -946,7 +957,7 @@
           codeDisplayArea.innerHTML = `
             <span class="email-code-display has-code">
               ${latestCode.code}
-              <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">码复制</button>
+              <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')" ontouchstart="copyToClipboard('${latestCode.code}')">码复制</button>
             </span>
           `;
           
@@ -962,7 +973,7 @@
             mobileCodeLine.innerHTML = `
               <div class="mobile-code-display">
                 ${latestCode.code}
-                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">码复制</button>
+                <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')" ontouchstart="copyToClipboard('${latestCode.code}')">码复制</button>
               </div>
               <div class="mobile-time-display">来码时间: ${sheetTime}</div>
             `;
@@ -1227,18 +1238,18 @@
             <div class="email-info">
               <span class="email-no">${index + 1}.</span>
               <span class="email-text" title="${email}">${email}</span>
-              <button class="email-copy-btn" onclick="copyToClipboard('${email}')">邮箱复制</button>
+              <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
               <span class="email-code-display" id="codeDisplay-${index}"></span>
               <span class="fetch-time" id="fetchTime-${index}"></span>
             </div>
             <div class="email-actions">
               ${isPolling ? `<span class="polling-status">查询中 (${remainingTime}s)</span>` : ''}
               ${isPolling ? `
-                <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)">
+                <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">
                   停止
                 </button>
               ` : ''}
-              <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)">
+              <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)">
                 ${isPolling ? '查询中' : '取码'}
               </button>
             </div>
@@ -1256,7 +1267,8 @@
 
     // 为指定邮箱获取验证码
     function fetchCodeForEmail(email, button) {
-      if (button.disabled) return;
+      console.log('fetchCodeForEmail 被调用:', email);
+      if (button && button.disabled) return;
       
       // 如果已经在查询中，停止查询
       if (pollingStatus[email] && pollingStatus[email].isActive) {
@@ -1340,6 +1352,7 @@
 
     // 停止查询指定邮箱（供按钮调用）
     function stopPollingForEmail(email, button) {
+      console.log('stopPollingForEmail 被调用:', email);
       stopPolling(email);
     }
 
