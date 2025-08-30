@@ -483,10 +483,43 @@
       animation: pulse 2s infinite;
     }
 
+    .email-copy-btn, .copy-btn, .fetch-btn, .stop-btn {
+      transition: all 0.3s ease;
+      transform: scale(1);
+    }
+
+    .email-copy-btn:hover, .copy-btn:hover, .fetch-btn:hover, .stop-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .email-copy-btn:active, .copy-btn:active, .fetch-btn:active, .stop-btn:active {
+      transform: scale(0.95);
+    }
+
     @keyframes pulse {
       0% { opacity: 1; }
       50% { opacity: 0.7; }
       100% { opacity: 1; }
+    }
+
+    @keyframes bounce {
+      0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0,0,0);
+      }
+      40%, 43% {
+        transform: translate3d(0, -8px, 0);
+      }
+      70% {
+        transform: translate3d(0, -4px, 0);
+      }
+      90% {
+        transform: translate3d(0, -2px, 0);
+      }
+    }
+
+    .copy-success {
+      animation: bounce 0.6s ease-out;
     }
 
     .operation-tip {
@@ -670,8 +703,8 @@
         <div class="guide-section">
           <h3>📋 功能说明</h3>
           <ul>
-            <li><strong>轮询机制</strong>：每次只能轮询一个邮箱，开始新轮询会自动停止其他轮询</li>
-            <li><strong>轮询时长</strong>：每个邮箱轮询5分钟，自动停止</li>
+            <li><strong>查询机制</strong>：每次只能查询一个邮箱，开始新查询会自动停止其他查询</li>
+            <li><strong>查询时长</strong>：每个邮箱查询5分钟，自动停止</li>
             <li><strong>验证码更新</strong>：只有发现新验证码才会更新显示，避免重复</li>
             <li><strong>时间显示</strong>：显示验证码在的实际获取时间</li>
           </ul>
@@ -697,10 +730,10 @@
     let refreshTimer = null;
     let emailList = [];
     
-    // 轮询状态管理
-    let pollingIntervals = {}; // 存储每个邮箱的轮询定时器
-    let pollingStatus = {}; // 存储每个邮箱的轮询状态
-    const POLLING_DURATION = 5 * 60 * 1000; // 5分钟轮询时间
+    // 查询状态管理
+    let pollingIntervals = {}; // 存储每个邮箱的查询定时器
+    let pollingStatus = {}; // 存储每个邮箱的查询状态
+    const POLLING_DURATION = 5 * 60 * 1000; // 5分钟查询时间
 
     // 格式化时间
     function formatTime(date) {
@@ -898,7 +931,7 @@
       console.log('开始获取邮箱列表，API地址:', API_URL);
       fetchEmailList();
       
-      // 设置定时器更新轮询状态显示（只更新倒计时，不重新渲染列表）
+      // 设置定时器更新查询状态显示（只更新倒计时，不重新渲染列表）
       setInterval(() => {
         Object.keys(pollingStatus).forEach(email => {
           if (pollingStatus[email] && pollingStatus[email].isActive) {
@@ -907,7 +940,7 @@
               const remainingTime = Math.ceil((pollingStatus[email].endTime - Date.now()) / 1000);
               const pollingStatusElement = emailItem.querySelector('.polling-status');
               if (pollingStatusElement && remainingTime > 0) {
-                pollingStatusElement.textContent = `轮询中 (${remainingTime}s)`;
+                pollingStatusElement.textContent = `查询中 (${remainingTime}s)`;
               }
             }
           }
@@ -1023,14 +1056,14 @@
               <span class="fetch-time" id="fetchTime-${index}"></span>
             </div>
             <div class="email-actions">
-              ${isPolling ? `<span class="polling-status">轮询中 (${remainingTime}s)</span>` : ''}
+              ${isPolling ? `<span class="polling-status">查询中 (${remainingTime}s)</span>` : ''}
               ${isPolling ? `
                 <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)">
                   停止
                 </button>
               ` : ''}
               <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)">
-                ${isPolling ? '轮询中' : '取码'}
+                ${isPolling ? '查询中' : '取码'}
               </button>
             </div>
           </div>
@@ -1048,24 +1081,24 @@
     function fetchCodeForEmail(email, button) {
       if (button.disabled) return;
       
-      // 如果已经在轮询中，停止轮询
+      // 如果已经在查询中，停止查询
       if (pollingStatus[email] && pollingStatus[email].isActive) {
         stopPolling(email);
         return;
       }
       
-      // 开始轮询
+      // 开始查询
       startPolling(email, button);
     }
 
-    // 开始轮询指定邮箱
+    // 开始查询指定邮箱
     function startPolling(email, button) {
-      console.log('开始轮询邮箱:', email);
+      console.log('开始查询邮箱:', email);
       
-      // 停止所有其他轮询
+      // 停止所有其他查询
       Object.keys(pollingStatus).forEach(otherEmail => {
         if (otherEmail !== email && pollingStatus[otherEmail] && pollingStatus[otherEmail].isActive) {
-          console.log('停止其他轮询:', otherEmail);
+          console.log('停止其他查询:', otherEmail);
           stopPolling(otherEmail);
         }
       });
@@ -1080,21 +1113,21 @@
       // 立即执行一次获取
       fetchCodeOnce(email, button);
       
-      // 设置定时器，每3秒轮询一次
+      // 设置定时器，每3秒查询一次
       pollingIntervals[email] = setInterval(() => {
         const remainingTime = pollingStatus[email].endTime - Date.now();
         
         if (remainingTime <= 0) {
-          // 轮询时间结束
+          // 查询时间结束
           stopPolling(email);
           return;
         }
         
-        // 继续轮询
+        // 继续查询
         fetchCodeOnce(email, button);
       }, REFRESH_INTERVAL);
       
-      // 设置轮询结束定时器
+      // 设置查询结束定时器
       setTimeout(() => {
         stopPolling(email);
       }, POLLING_DURATION);
@@ -1103,12 +1136,12 @@
       updatePollingDisplay(email);
       
       // 显示操作提示
-      showOperationTip(email, '开始轮询');
+      showOperationTip(email, '开始查询');
     }
 
-    // 停止轮询指定邮箱
+    // 停止查询指定邮箱
     function stopPolling(email) {
-      console.log('停止轮询邮箱:', email);
+      console.log('停止查询邮箱:', email);
       
       // 清除定时器
       if (pollingIntervals[email]) {
@@ -1116,7 +1149,7 @@
         delete pollingIntervals[email];
       }
       
-      // 清除轮询状态
+      // 清除查询状态
       if (pollingStatus[email]) {
         pollingStatus[email].isActive = false;
       }
@@ -1125,17 +1158,17 @@
       updatePollingDisplay(email);
       
       // 显示操作提示
-      showOperationTip(email, '轮询结束');
+      showOperationTip(email, '查询结束');
     }
 
-    // 停止轮询指定邮箱（供按钮调用）
+    // 停止查询指定邮箱（供按钮调用）
     function stopPollingForEmail(email, button) {
       stopPolling(email);
     }
 
     // 单次获取验证码
     function fetchCodeOnce(email, button) {
-      console.log('轮询获取验证码:', email);
+      console.log('查询获取验证码:', email);
       
       // 获取当前显示的验证码
       const emailIndex = emailList.findIndex(e => e === email);
@@ -1174,7 +1207,7 @@
         if (script.parentNode) {
           document.head.removeChild(script);
         }
-        console.log('轮询请求超时:', email);
+        console.log('查询请求超时:', email);
       }, 10000); // 10秒超时
       
       // 定义回调函数
@@ -1189,16 +1222,16 @@
           document.head.removeChild(script);
         }
         
-        console.log('轮询回调收到数据:', data);
+        console.log('查询回调收到数据:', data);
         
         try {
           if (data.status === 'OK' && data.data) {
-            console.log('轮询验证码数据:', data.data);
+            console.log('查询验证码数据:', data.data);
             renderCodeDisplay(data.data, email);
           } else if (data.status === 'ERROR') {
-            console.log('轮询服务错误:', data.message);
+            console.log('查询服务错误:', data.message);
           } else {
-            console.log('轮询未知响应格式:', data);
+            console.log('查询未知响应格式:', data);
           }
         } catch (error) {
           console.error('轮询处理响应时出错:', error);
@@ -1209,9 +1242,9 @@
       document.head.appendChild(script);
     }
 
-    // 更新轮询显示
+    // 更新查询显示
     function updatePollingDisplay(email) {
-      // 只更新特定邮箱的轮询状态，不重新渲染整个列表
+      // 只更新特定邮箱的查询状态，不重新渲染整个列表
       const emailIndex = emailList.findIndex(email => email === email);
       if (emailIndex !== -1) {
         const emailItem = document.querySelector(`[data-email="${email}"]`);
@@ -1219,16 +1252,16 @@
           const isPolling = pollingStatus[email] && pollingStatus[email].isActive;
           const remainingTime = isPolling ? Math.ceil((pollingStatus[email].endTime - Date.now()) / 1000) : 0;
           
-          // 更新轮询状态显示
+          // 更新查询状态显示
           const pollingStatusElement = emailItem.querySelector('.polling-status');
           if (pollingStatusElement) {
-            pollingStatusElement.textContent = isPolling ? `轮询中 (${remainingTime}s)` : '';
+            pollingStatusElement.textContent = isPolling ? `查询中 (${remainingTime}s)` : '';
           }
           
           // 更新按钮状态
           const fetchBtn = emailItem.querySelector('.fetch-btn');
           if (fetchBtn) {
-            fetchBtn.textContent = isPolling ? '轮询中' : '取码';
+            fetchBtn.textContent = isPolling ? '查询中' : '取码';
             fetchBtn.className = `fetch-btn ${isPolling ? 'polling' : ''}`;
           }
           
@@ -1300,24 +1333,18 @@
       navigator.clipboard.writeText(text).then(() => {
         // 显示复制成功提示
         const copyBtn = event.target;
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = '已复制';
+        let message = '';
         
-        // 根据按钮类型设置不同的背景色
+        // 根据按钮类型显示不同的提示信息
         if (copyBtn.classList.contains('email-copy-btn')) {
-          copyBtn.style.background = '#10b981';
+          message = '邮箱已复制';
         } else {
-          copyBtn.style.background = '#10b981';
+          message = '验证码已复制';
         }
         
-        setTimeout(() => {
-          copyBtn.textContent = originalText;
-          if (copyBtn.classList.contains('email-copy-btn')) {
-            copyBtn.style.background = '#8b5cf6';
-          } else {
-            copyBtn.style.background = '#10b981';
-          }
-        }, 1000);
+        // 显示操作提示
+        showOperationTip(text, message);
+        
       }).catch(err => {
         console.error('复制失败:', err);
         // 降级方案
@@ -1327,6 +1354,9 @@
         textArea.select();
         document.execCommand('copy');
         document.body.removeChild(textArea);
+        
+        // 显示复制失败提示
+        showOperationTip(text, '复制失败');
       });
     }
 
