@@ -541,7 +541,7 @@
 
   <script>
     // 配置
-    const API_URL = 'https://script.google.com/macros/s/AKfycbw8uddQq18XNJ4BCqjHCP00epK2vdyQobqAggsHPaNY0BaYH2wHJMk-Reu2_lNjlc1jeQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycby6HMd5cW73eWQ-bCcaXurgPmZr_EA-epuHt4IzdTE6kgifQ61ZUigH5s9D-R4tMsN3hw/exec';
     const REFRESH_INTERVAL = 3000; // 3秒刷新一次
     let lastCode = null;
     let refreshTimer = null;
@@ -595,27 +595,52 @@
         return;
       }
 
-      // 如果有验证码数据，显示最新的验证码
+      // 如果有验证码数据，检查是否是新码
       if (data.codes && data.codes.length > 0) {
         const latestCode = data.codes[0];
-        const fetchTime = new Date().toLocaleTimeString('zh-CN');
         
-        codeDisplayArea.innerHTML = `
-          <span class="code-display has-code">
-            ${latestCode.code}
-            <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">复制</button>
-          </span>
-        `;
+        // 检查当前显示的验证码
+        const currentCodeElement = codeDisplayArea.querySelector('.code-display.has-code');
+        const currentCode = currentCodeElement ? currentCodeElement.textContent.trim().split(' ')[0] : null;
         
-        // 显示获取时间
-        const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
-        if (fetchTimeElement) {
-          fetchTimeElement.innerHTML = `<span class="time-text">获取时间: ${fetchTime}</span>`;
+        // 只有新码才更新显示
+        if (!currentCode || currentCode !== latestCode.code) {
+          console.log('发现新验证码，更新显示:', latestCode.code);
+          const fetchTime = new Date().toLocaleTimeString('zh-CN');
+          
+          // 更新验证码显示
+          codeDisplayArea.innerHTML = `
+            <span class="code-display has-code">
+              ${latestCode.code}
+              <button class="copy-btn" onclick="copyToClipboard('${latestCode.code}')">复制</button>
+            </span>
+          `;
+          
+          // 更新获取时间
+          const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
+          if (fetchTimeElement) {
+            fetchTimeElement.innerHTML = `<span class="time-text">获取时间: ${fetchTime}</span>`;
+          }
+          
+          emailItem.classList.add('has-code');
+        } else {
+          console.log('验证码未变化，只更新时间:', latestCode.code);
+          // 即使验证码相同，也更新时间
+          const fetchTime = new Date().toLocaleTimeString('zh-CN');
+          const fetchTimeElement = document.getElementById(`fetchTime-${emailIndex}`);
+          if (fetchTimeElement) {
+            fetchTimeElement.innerHTML = `<span class="time-text">获取时间: ${fetchTime}</span>`;
+          }
+        }
+      } else {
+        // 没有验证码时，只有当前没有显示验证码才更新
+        const currentCodeElement = codeDisplayArea.querySelector('.code-display.has-code');
+        if (currentCodeElement) {
+          console.log('当前有验证码，但API返回空，保持原状态');
+          return;
         }
         
-        emailItem.classList.add('has-code');
-      } else {
-        // 没有验证码时显示提示
+        // 当前没有验证码时才显示"暂无验证码"
         codeDisplayArea.innerHTML = `<span class="code-display">暂无验证码</span>`;
         
         // 清除获取时间
@@ -686,11 +711,10 @@
       fetchEmailList();
     });
 
-    // 页面可见性变化时刷新
+    // 页面可见性变化时不刷新邮箱列表
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        console.log('页面变为可见，刷新邮箱列表');
-        fetchEmailList();
+        console.log('页面变为可见，不刷新邮箱列表');
       }
     });
 
@@ -722,11 +746,20 @@
       console.log('开始获取邮箱列表，API地址:', API_URL);
       fetchEmailList();
       
-      // 设置定时器更新轮询状态显示
+      // 设置定时器更新轮询状态显示（只更新倒计时，不重新渲染列表）
       setInterval(() => {
-        if (emailList.length > 0) {
-          renderEmailList(emailList);
-        }
+        Object.keys(pollingStatus).forEach(email => {
+          if (pollingStatus[email] && pollingStatus[email].isActive) {
+            const emailItem = document.querySelector(`[data-email="${email}"]`);
+            if (emailItem) {
+              const remainingTime = Math.ceil((pollingStatus[email].endTime - Date.now()) / 1000);
+              const pollingStatusElement = emailItem.querySelector('.polling-status');
+              if (pollingStatusElement && remainingTime > 0) {
+                pollingStatusElement.textContent = `轮询中 (${remainingTime}s)`;
+              }
+            }
+          }
+        });
       }, 1000); // 每秒更新一次倒计时
     }
 
@@ -744,22 +777,37 @@
       // 创建唯一的回调函数名
       const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       
+      // 清理可能存在的同名回调函数
+      if (window[callbackName]) {
+        window[callbackName] = null;
+      }
+      
       // 创建script标签
       const script = document.createElement('script');
       script.src = API_URL + '?action=getEmailList&callback=' + callbackName;
       
       // 设置超时
       const timeout = setTimeout(() => {
-        window[callbackName] = null;
-        document.head.removeChild(script);
+        if (window[callbackName]) {
+          window[callbackName] = null;
+        }
+        if (script.parentNode) {
+          document.head.removeChild(script);
+        }
         renderEmailList([]);
       }, 10000);
       
       // 定义回调函数
       window[callbackName] = function(data) {
         clearTimeout(timeout);
-        window[callbackName] = null;
-        document.head.removeChild(script);
+        
+        // 清理回调函数和script标签
+        if (window[callbackName]) {
+          window[callbackName] = null;
+        }
+        if (script.parentNode) {
+          document.head.removeChild(script);
+        }
         
         console.log('邮箱列表回调收到数据:', data);
         
@@ -780,8 +828,12 @@
       // 处理加载错误
       script.onerror = function() {
         clearTimeout(timeout);
-        window[callbackName] = null;
-        document.head.removeChild(script);
+        if (window[callbackName]) {
+          window[callbackName] = null;
+        }
+        if (script.parentNode) {
+          document.head.removeChild(script);
+        }
         console.error('获取邮箱列表失败');
         renderEmailList([]);
       };
@@ -857,6 +909,14 @@
     function startPolling(email, button) {
       console.log('开始轮询邮箱:', email);
       
+      // 停止所有其他轮询
+      Object.keys(pollingStatus).forEach(otherEmail => {
+        if (otherEmail !== email && pollingStatus[otherEmail] && pollingStatus[otherEmail].isActive) {
+          console.log('停止其他轮询:', otherEmail);
+          stopPolling(otherEmail);
+        }
+      });
+      
       // 设置轮询状态
       pollingStatus[email] = {
         isActive: true,
@@ -927,22 +987,37 @@
       // 创建唯一的回调函数名
       const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       
+      // 清理可能存在的同名回调函数
+      if (window[callbackName]) {
+        window[callbackName] = null;
+      }
+      
       // 创建script标签
       const script = document.createElement('script');
       script.src = API_URL + '?email=' + encodeURIComponent(email) + '&callback=' + callbackName;
       
       // 设置超时
       const timeout = setTimeout(() => {
-        window[callbackName] = null;
-        document.head.removeChild(script);
+        if (window[callbackName]) {
+          window[callbackName] = null;
+        }
+        if (script.parentNode) {
+          document.head.removeChild(script);
+        }
         console.log('轮询请求超时:', email);
       }, 10000); // 10秒超时
       
       // 定义回调函数
       window[callbackName] = function(data) {
         clearTimeout(timeout);
-        window[callbackName] = null;
-        document.head.removeChild(script);
+        
+        // 清理回调函数和script标签
+        if (window[callbackName]) {
+          window[callbackName] = null;
+        }
+        if (script.parentNode) {
+          document.head.removeChild(script);
+        }
         
         console.log('轮询回调收到数据:', data);
         
@@ -966,8 +1041,45 @@
 
     // 更新轮询显示
     function updatePollingDisplay(email) {
-      // 重新渲染邮箱列表以更新显示
-      renderEmailList(emailList);
+      // 只更新特定邮箱的轮询状态，不重新渲染整个列表
+      const emailIndex = emailList.findIndex(email => email === email);
+      if (emailIndex !== -1) {
+        const emailItem = document.querySelector(`[data-email="${email}"]`);
+        if (emailItem) {
+          const isPolling = pollingStatus[email] && pollingStatus[email].isActive;
+          const remainingTime = isPolling ? Math.ceil((pollingStatus[email].endTime - Date.now()) / 1000) : 0;
+          
+          // 更新轮询状态显示
+          const pollingStatusElement = emailItem.querySelector('.polling-status');
+          if (pollingStatusElement) {
+            pollingStatusElement.textContent = isPolling ? `轮询中 (${remainingTime}s)` : '';
+          }
+          
+          // 更新按钮状态
+          const fetchBtn = emailItem.querySelector('.fetch-btn');
+          if (fetchBtn) {
+            fetchBtn.textContent = isPolling ? '轮询中' : '取码';
+            fetchBtn.className = `fetch-btn ${isPolling ? 'polling' : ''}`;
+          }
+          
+          // 更新停止按钮
+          const stopBtn = emailItem.querySelector('.stop-btn');
+          if (isPolling) {
+            if (!stopBtn) {
+              const actionsDiv = emailItem.querySelector('.email-actions');
+              const newStopBtn = document.createElement('button');
+              newStopBtn.className = 'stop-btn';
+              newStopBtn.textContent = '停止';
+              newStopBtn.onclick = () => stopPollingForEmail(email, newStopBtn);
+              actionsDiv.insertBefore(newStopBtn, actionsDiv.firstChild);
+            }
+          } else {
+            if (stopBtn) {
+              stopBtn.remove();
+            }
+          }
+        }
+      }
     }
 
     // 显示操作提示
