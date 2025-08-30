@@ -347,14 +347,15 @@
       flex: 1;
       flex-wrap: nowrap;
       overflow: hidden;
+      width: 100%;
     }
 
     .email-no {
       font-size: 13px;
       color: #374151;
       font-weight: 500;
-      min-width: 250px;
-      max-width: 250px;
+      min-width: 200px;
+      max-width: 200px;
       margin-right: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -381,7 +382,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      min-width: 220px;
+      min-width: 180px;
       flex-shrink: 0;
     }
 
@@ -467,6 +468,7 @@
       margin-left: 8px;
       white-space: nowrap;
       flex-shrink: 0;
+      min-width: 60px;
     }
 
     .email-copy-btn:hover {
@@ -484,9 +486,9 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      margin-right: 8px;
       white-space: nowrap;
       flex-shrink: 0;
+      min-width: 50px;
     }
 
     .stop-btn:hover {
@@ -498,9 +500,9 @@
       font-size: 11px;
       color: #f59e0b;
       font-weight: 600;
-      margin-left: 8px;
       white-space: nowrap;
       flex-shrink: 0;
+      min-width: 80px;
     }
 
     .fetch-time {
@@ -1259,26 +1261,27 @@
             </div>
           `;
                 } else {
-          // 电脑端：一行显示所有内容
+          // 桌面端：一行显示所有内容
           return `
             <div class="email-item ${isEven ? 'even' : 'odd'}" data-email="${email}" data-index="${index}">
               <div class="email-info">
                 <span class="email-no">${index + 1}. ${email}</span>
                 <button class="email-copy-btn" onclick="copyToClipboard('${email}')" ontouchstart="copyToClipboard('${email}')">邮箱复制</button>
+                
                 <span class="email-code-display" id="codeDisplay-${index}">
                   <span class="code-value"></span>
                   <button class="copy-btn" style="display:none">码复制</button>
                   <span class="time-text" id="fetchTime-${index}"></span>
                 </span>
-              </div>
-              <div class="email-actions">
+
                 ${isPolling ? `<span class="polling-status">查询中 (${remainingTime}s)</span>` : ''}
                 ${isPolling ? `
-                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">
-                    停止
-                  </button>
+                  <button class="stop-btn" onclick="stopPollingForEmail('${email}', this)" ontouchstart="stopPollingForEmail('${email}', this)">停止</button>
                 ` : ''}
-                <button class="fetch-btn ${isPolling ? 'polling' : ''}" onclick="fetchCodeForEmail('${email}', this)" ontouchstart="fetchCodeForEmail('${email}', this)" ${isPolling ? 'disabled' : ''}>
+                <button class="fetch-btn ${isPolling ? 'polling' : ''}" 
+                        onclick="fetchCodeForEmail('${email}', this)" 
+                        ontouchstart="fetchCodeForEmail('${email}', this)" 
+                        ${isPolling ? 'disabled' : ''}>
                   ${isPolling ? '查询中' : '取码'}
                 </button>
               </div>
@@ -1513,13 +1516,15 @@
           const stopBtn = emailItem.querySelector('.stop-btn');
           if (isPolling) {
             if (!stopBtn) {
-              const actionsDiv = emailItem.querySelector('.email-actions');
+              const emailInfo = emailItem.querySelector('.email-info');
               const newStopBtn = document.createElement('button');
               newStopBtn.className = 'stop-btn';
               newStopBtn.textContent = '停止';
               newStopBtn.onclick = () => stopPollingForEmail(email, newStopBtn);
               newStopBtn.ontouchstart = () => stopPollingForEmail(email, newStopBtn);
-              actionsDiv.insertBefore(newStopBtn, actionsDiv.firstChild);
+              // 插入到取码按钮之前
+              const fetchBtn = emailItem.querySelector('.fetch-btn');
+              emailInfo.insertBefore(newStopBtn, fetchBtn);
             }
           } else {
             if (stopBtn) {
