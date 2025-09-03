@@ -101,6 +101,8 @@
       <div class="loading">
         <div class="loading-text">正在加载邮箱列表，请稍候...</div>
         <div id="timerStatus" style="font-size:12px;color:#666;margin-top:10px;"></div>
+        <div id="autoFetchStatus" style="font-size:12px;color:#3b82f6;margin-top:5px;display:none;">🔄 自动查询验证码中...</div>
+        <div id="pollingStatus" style="font-size:12px;color:#f59e0b;margin-top:5px;display:none;">⏳ 正在轮询: 0个邮箱</div>
       </div>
     </div>
 
@@ -119,9 +121,11 @@
         <div class="guide-section">
           <h3>📋 功能说明</h3>
           <ul>
-            <li><strong>查询机制</strong>：每次只能查询一个邮箱，开始新查询会自动停止其他查询</li>
-            <li><strong>查询时长</strong>：每个邮箱查询5分钟，自动停止</li>
+            <li><strong>查询机制</strong>：支持多个邮箱同时轮询，互不干扰</li>
+            <li><strong>查询时长</strong>：每个邮箱查询3分钟，自动停止</li>
+            <li><strong>轮询间隔</strong>：每秒查询一次，快速响应</li>
             <li><strong>验证码更新</strong>：只有发现新验证码才会更新显示，避免重复</li>
+            <li><strong>持续监控</strong>：找到验证码后继续轮询，获取可能的更新</li>
             <li><strong>时间显示</strong>：显示验证码的实际获取时间</li>
             <li><strong>持久化显示</strong>：已查询到的验证码会一直显示，不会消失</li>
           </ul>
@@ -140,15 +144,15 @@
 
 <script>
   // 心蓝邮箱验证码展示系统 
-const API_URL = 'https://script.google.com/macros/s/AKfycbx8J2yERHi5-LHcaQJ73UilJUBBW7wxe5QkoB3eaZtn4jF0M69d_YTgWWxp9CxEnCsk/exec';
-const REFRESH_INTERVAL = 3000;
+const API_URL = 'https://script.google.com/macros/s/AKfycbwBy-Zb3uZOSWIAaLEUmOOwunv0hU51wWl4dLIAZNvliCoI2oIFk3AjD77LXY70u2lE/exec';
+const REFRESH_INTERVAL = 1000;
 let emailList = [];
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
 // 轮询状态
 let pollingIntervals = {};
 let pollingStatus = {};
-const POLLING_DURATION = 5 * 60 * 1000;
+const POLLING_DURATION = 3 * 60 * 1000;
 
 // 存储已获取的验证码
 let fetchedCodes = {};
@@ -167,6 +171,12 @@ function initializeCodeCollection(){
   }
   
   fetchEmailList();
+  
+  // 页面加载完成后，自动查询所有邮箱的验证码
+  setTimeout(() => {
+    autoFetchAllEmails();
+  }, 2000); // 等待2秒让邮箱列表加载完成
+  
   // 每秒刷新倒计时文本
   setInterval(() => {
     Object.keys(pollingStatus).forEach(email => {
@@ -268,19 +278,9 @@ function renderEmailList(emails){
 
 // 单次查询（JSONP）
 function fetchCodeOnce(email, button){
-  const emailIndex = emailList.findIndex(e => e === email);
-
-  // 取当前显示的验证码（桌面端）
-  let currentCode = null;
-  if (emailIndex !== -1 && !isMobile){
-    const valEl = document.querySelector(`#codeDisplay-${emailIndex} .code-value`);
-    if (valEl) currentCode = (valEl.textContent || '').trim();
-  }
-
   const cb = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).slice(2);
   const s = document.createElement('script');
-  let url = API_URL + '?email=' + encodeURIComponent(email) + '&callback=' + cb;
-  if (currentCode) url += '&currentCode=' + encodeURIComponent(currentCode);
+  const url = API_URL + '?email=' + encodeURIComponent(email) + '&callback=' + cb;
   s.src = url;
 
   const to = setTimeout(() => { cleanup(); console.log('查询超时', email); }, 10000);
@@ -328,12 +328,22 @@ function renderCodeDisplay(data, targetEmail){
     const latest = data.codes[0];
     const sheetTime = latest.time ? new Date(latest.time).toLocaleTimeString('zh-CN') : new Date().toLocaleTimeString('zh-CN');
 
+    // 检查是否是新验证码（与本地存储的比较）
+    const currentCode = fetchedCodes[targetEmail] ? fetchedCodes[targetEmail].code : null;
+    if (currentCode === latest.code) {
+      console.log("📖 验证码未变化，不更新显示:", { email: targetEmail, code: latest.code });
+      return; // 验证码相同，不更新显示
+    }
+
     // 保存到本地存储
     fetchedCodes[targetEmail] = {
       code: latest.code,
       time: sheetTime
     };
     localStorage.setItem('fetchedCodes', JSON.stringify(fetchedCodes));
+    
+    // 找到验证码后，继续轮询以获取可能的更新
+    console.log(`✅ 邮箱 ${targetEmail} 找到验证码，继续轮询以获取更新`);
 
     if (isMobile){
       const line = document.getElementById(`mobileCodeLine-${index}`);
@@ -382,9 +392,8 @@ function fetchCodeForEmail(email, btn){
 
 // 开始轮询
 function startPolling(email, btn){
-  // 停掉其他
-  Object.keys(pollingStatus).forEach(e => { if (e!==email) stopPolling(e); });
-
+  // 不中断其他邮箱的轮询，支持多个邮箱同时轮询
+  
   pollingStatus[email] = { isActive:true, startTime:Date.now(), endTime:Date.now()+POLLING_DURATION };
 
   fetchCodeOnce(email, btn);
@@ -434,6 +443,81 @@ function updatePollingDisplay(email){
   if (stopBtn){
     stopBtn.style.display = isPolling ? 'inline-block' : 'none';
   }
+  
+  // 更新全局轮询状态显示
+  updateGlobalPollingStatus();
+}
+
+// 更新全局轮询状态显示
+function updateGlobalPollingStatus() {
+  const pollingStatusEl = document.getElementById('pollingStatus');
+  if (!pollingStatusEl) return;
+  
+  // 计算正在轮询的邮箱数量
+  let activePollingCount = 0;
+  Object.keys(pollingStatus).forEach(email => {
+    if (pollingStatus[email] && pollingStatus[email].isActive) {
+      activePollingCount++;
+    }
+  });
+  
+  if (activePollingCount > 0) {
+    pollingStatusEl.style.display = 'block';
+    pollingStatusEl.textContent = `⏳ 正在轮询: ${activePollingCount}个邮箱`;
+  } else {
+    pollingStatusEl.style.display = 'none';
+  }
+}
+
+// 自动查询所有邮箱的验证码
+function autoFetchAllEmails() {
+  if (!emailList || emailList.length === 0) {
+    console.log("📧 邮箱列表为空，跳过自动查询");
+    return;
+  }
+  
+  console.log("🚀 开始自动查询所有邮箱的验证码...");
+  
+  // 显示自动查询状态
+  const statusEl = document.getElementById('autoFetchStatus');
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.textContent = `🔄 自动查询验证码中... (0/${emailList.length})`;
+  }
+  
+  let completedCount = 0;
+  
+  // 逐个查询每个邮箱，间隔500ms避免请求过于频繁
+  emailList.forEach((email, index) => {
+    setTimeout(() => {
+      console.log(`📧 自动查询邮箱 ${index + 1}/${emailList.length}: ${email}`);
+      
+      // 检查是否已有验证码
+      if (fetchedCodes[email] && fetchedCodes[email].code) {
+        console.log(`📧 邮箱 ${email} 已有验证码，跳过查询`);
+        completedCount++;
+        if (statusEl) {
+          statusEl.textContent = `🔄 自动查询验证码中... (${completedCount}/${emailList.length})`;
+        }
+      } else {
+        // 没有验证码的邮箱开始轮询
+        startPolling(email, null);
+        completedCount++;
+        if (statusEl) {
+          statusEl.textContent = `🔄 自动查询验证码中... (${completedCount}/${emailList.length})`;
+        }
+      }
+      
+      // 所有查询完成后隐藏状态
+      if (completedCount === emailList.length) {
+        setTimeout(() => {
+          if (statusEl) {
+            statusEl.style.display = 'none';
+          }
+        }, 2000);
+      }
+    }, index * 500);
+  });
 }
 
 // 复制
